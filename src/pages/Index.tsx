@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -73,7 +72,6 @@ const Index = () => {
     
     try {
       console.log("Analyzing data for variable:", selectedVariable);
-      // Direct analysis without setTimeout to help with debugging
       const result = analyzeDataset(processedData, selectedVariable);
       console.log("Analysis result:", result);
       
@@ -97,9 +95,7 @@ const Index = () => {
   };
   
   const handleGenerateVisualization = (visualization: VisualizationData) => {
-    // Add the visualization from chat to the visualizations panel
     setVisualizations(prev => [visualization, ...prev]);
-    // Switch to the visualize tab
     setActiveTab("visualize");
     
     toast({
@@ -148,6 +144,7 @@ const Index = () => {
               processedData={processedData} 
               onSelectVariable={handleSelectVariable} 
               selectedVariable={selectedVariable}
+              onAnalyze={handleAnalyzeData}
             />
             
             <div className="flex flex-col gap-4">
@@ -269,8 +266,6 @@ const Index = () => {
     </main>
   );
 };
-
-// Helper Components
 
 interface StepIndicatorProps {
   number: number;

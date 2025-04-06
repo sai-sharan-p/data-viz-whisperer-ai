@@ -15,12 +15,14 @@ interface VariableSelectorProps {
   processedData: ProcessedData;
   onSelectVariable: (variable: string) => void;
   selectedVariable: string | null;
+  onAnalyze?: () => void;
 }
 
 const VariableSelector = ({ 
   processedData, 
   onSelectVariable, 
-  selectedVariable 
+  selectedVariable,
+  onAnalyze
 }: VariableSelectorProps) => {
   const { headers, summary } = processedData;
   
@@ -84,7 +86,7 @@ const VariableSelector = ({
               <div className="mt-4">
                 <Button 
                   className="w-full"
-                  onClick={() => {}}
+                  onClick={() => onAnalyze && onAnalyze()}
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Analyze {selectedVariable}
