@@ -84,7 +84,7 @@ const VariableSelector = ({
               <div className="mt-4">
                 <Button 
                   className="w-full"
-                  onClick={() => onSelectVariable(selectedVariable)}
+                  onClick={() => {}}
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Analyze {selectedVariable}

@@ -59,33 +59,41 @@ const Index = () => {
   };
   
   const handleAnalyzeData = () => {
-    if (!processedData || !selectedVariable) return;
+    if (!processedData || !selectedVariable) {
+      toast({
+        title: "Cannot analyze data",
+        description: "Please select a target variable first.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsAnalyzing(true);
     setAnalyzedVariable(selectedVariable);
     
-    // Simulate analysis delay
-    setTimeout(() => {
-      try {
-        const result = analyzeDataset(processedData, selectedVariable);
-        setVisualizations(result.visualizations);
-        setInsights(result.insights);
-        
-        toast({
-          title: "Analysis complete",
-          description: `Generated ${result.visualizations.length} visualizations and ${result.insights.length} insights.`,
-        });
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error analyzing data",
-          description: error instanceof Error ? error.message : "An unknown error occurred",
-          variant: "destructive",
-        });
-      } finally {
-        setIsAnalyzing(false);
-      }
-    }, 1000);
+    try {
+      console.log("Analyzing data for variable:", selectedVariable);
+      // Direct analysis without setTimeout to help with debugging
+      const result = analyzeDataset(processedData, selectedVariable);
+      console.log("Analysis result:", result);
+      
+      setVisualizations(result.visualizations);
+      setInsights(result.insights);
+      
+      toast({
+        title: "Analysis complete",
+        description: `Generated ${result.visualizations.length} visualizations and ${result.insights.length} insights.`,
+      });
+    } catch (error) {
+      console.error("Error during analysis:", error);
+      toast({
+        title: "Error analyzing data",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
   
   const handleGenerateVisualization = (visualization: VisualizationData) => {
