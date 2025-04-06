@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -24,6 +25,7 @@ const Index = () => {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState<"visualize" | "chat">("visualize");
+  const [error, setError] = useState<string | null>(null);
   
   const handleFileUpload = async (file: File) => {
     try {
@@ -33,6 +35,7 @@ const Index = () => {
       setAnalyzedVariable(null);
       setVisualizations([]);
       setInsights([]);
+      setError(null);
       
       const data = await processFile(file);
       setProcessedData(data);
@@ -55,6 +58,7 @@ const Index = () => {
   
   const handleSelectVariable = (variable: string) => {
     setSelectedVariable(variable);
+    setError(null);
   };
   
   const handleAnalyzeData = () => {
@@ -68,15 +72,27 @@ const Index = () => {
     }
     
     setIsAnalyzing(true);
-    setAnalyzedVariable(selectedVariable);
+    setError(null);
     
     try {
       console.log("Analyzing data for variable:", selectedVariable);
       const result = analyzeDataset(processedData, selectedVariable);
       console.log("Analysis result:", result);
       
+      if (result.visualizations.length === 0 && result.insights.length === 0) {
+        setError("No visualizations or insights could be generated for this variable. Try selecting a different variable.");
+        toast({
+          title: "Analysis returned no results",
+          description: "No visualizations or insights could be generated for this variable.",
+          variant: "destructive",
+        });
+        setIsAnalyzing(false);
+        return;
+      }
+      
       setVisualizations(result.visualizations);
       setInsights(result.insights);
+      setAnalyzedVariable(selectedVariable);
       
       toast({
         title: "Analysis complete",
@@ -84,11 +100,13 @@ const Index = () => {
       });
     } catch (error) {
       console.error("Error during analysis:", error);
+      setError(error instanceof Error ? error.message : "An unknown error occurred during analysis");
       toast({
         title: "Error analyzing data",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
+      // Don't set analyzedVariable on error
     } finally {
       setIsAnalyzing(false);
     }
@@ -172,6 +190,12 @@ const Index = () => {
                 />
               </div>
               
+              {error && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+                  {error}
+                </div>
+              )}
+              
               <Button
                 className="mt-4"
                 disabled={!selectedVariable || isAnalyzing}
@@ -197,6 +221,7 @@ const Index = () => {
               setAnalyzedVariable(null);
               setVisualizations([]);
               setInsights([]);
+              setError(null);
             }}
           >
             <ChevronLeft className="h-4 w-4" />

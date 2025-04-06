@@ -40,6 +40,15 @@ const VariableSelector = ({
     }
   };
 
+  const handleAnalyzeClick = () => {
+    if (onAnalyze) {
+      console.log("Analyze button clicked, calling onAnalyze function");
+      onAnalyze();
+    } else {
+      console.log("Analyze button clicked but no onAnalyze function provided");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -86,7 +95,7 @@ const VariableSelector = ({
               <div className="mt-4">
                 <Button 
                   className="w-full"
-                  onClick={() => onAnalyze && onAnalyze()}
+                  onClick={handleAnalyzeClick}
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Analyze {selectedVariable}
