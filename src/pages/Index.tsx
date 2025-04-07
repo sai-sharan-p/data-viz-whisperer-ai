@@ -251,36 +251,38 @@ const Index = () => {
       </div>
       
       <div className="flex-1 overflow-hidden">
-        <TabsContent value="visualize" className="h-full m-0">
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel defaultSize={70} minSize={40}>
-              <div className="p-6 h-full overflow-auto">
-                <DataVisualizations 
-                  visualizations={visualizations} 
-                  isLoading={isAnalyzing} 
-                />
-              </div>
-            </ResizablePanel>
-            
-            <ResizableHandle withHandle />
-            
-            <ResizablePanel defaultSize={30} minSize={25}>
-              <div className="p-6 h-full">
-                <InsightsPanel 
-                  insights={insights} 
-                  isLoading={isAnalyzing} 
-                />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </TabsContent>
-        
-        <TabsContent value="chat" className="h-full m-0 p-6">
-          <DataChat 
-            processedData={processedData} 
-            onGenerateVisualization={handleGenerateVisualization} 
-          />
-        </TabsContent>
+        <Tabs value={activeTab} className="h-full">
+          <TabsContent value="visualize" className="h-full m-0">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              <ResizablePanel defaultSize={70} minSize={40}>
+                <div className="p-6 h-full overflow-auto">
+                  <DataVisualizations 
+                    visualizations={visualizations} 
+                    isLoading={isAnalyzing} 
+                  />
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={30} minSize={25}>
+                <div className="p-6 h-full">
+                  <InsightsPanel 
+                    insights={insights} 
+                    isLoading={isAnalyzing} 
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </TabsContent>
+          
+          <TabsContent value="chat" className="h-full m-0 p-6">
+            <DataChat 
+              processedData={processedData} 
+              onGenerateVisualization={handleGenerateVisualization} 
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
