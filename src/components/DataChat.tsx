@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, FileUp, Lightbulb } from "lucide-react";
+import { Send, Lightbulb } from "lucide-react";
 import DataVisualizations from "@/components/DataVisualizations";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { chatWithLLM } from "@/utils/llmService";
