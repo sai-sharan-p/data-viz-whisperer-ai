@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -11,6 +12,7 @@ import VariableSelector from "@/components/VariableSelector";
 import DataVisualizations from "@/components/DataVisualizations";
 import InsightsPanel from "@/components/InsightsPanel";
 import DataChat from "@/components/DataChat";
+import DataTable from "@/components/DataTable";
 import { ProcessedData, processFile } from "@/utils/fileProcessing";
 import { VisualizationData, Insight, analyzeDataset } from "@/utils/dataAnalysis";
 
@@ -155,46 +157,53 @@ const Index = () => {
         <FileUploader onFileUpload={handleFileUpload} isProcessing={isProcessing} />
         
         {processedData && (
-          <div className="grid sm:grid-cols-2 gap-6">
-            <VariableSelector 
-              processedData={processedData} 
-              onSelectVariable={handleSelectVariable} 
-              selectedVariable={selectedVariable}
-              onAnalyze={handleAnalyzeData}
-            />
-            
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold">Dataset Summary</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <DataStatCard 
-                  icon={<FileText className="h-4 w-4" />}
-                  label="Rows" 
-                  value={processedData.summary.rowCount} 
-                />
-                <DataStatCard 
-                  icon={<Database className="h-4 w-4" />}
-                  label="Columns" 
-                  value={processedData.headers.length} 
-                />
-                <DataStatCard 
-                  icon={<BarChart className="h-4 w-4" />}
-                  label="Numeric Variables" 
-                  value={processedData.summary.numericColumns.length} 
-                />
-                <DataStatCard 
-                  icon={<Brain className="h-4 w-4" />}
-                  label="Categorical Variables" 
-                  value={processedData.summary.categoricalColumns.length} 
-                />
-              </div>
-              
-              {error && (
-                <div className="mt-2 p-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                  {error}
-                </div>
-              )}
+          <>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Dataset Preview</h3>
+              <DataTable processedData={processedData} />
             </div>
-          </div>
+            
+            <div className="grid sm:grid-cols-2 gap-6">
+              <VariableSelector 
+                processedData={processedData} 
+                onSelectVariable={handleSelectVariable} 
+                selectedVariable={selectedVariable}
+                onAnalyze={handleAnalyzeData}
+              />
+              
+              <div className="flex flex-col gap-4">
+                <h3 className="text-lg font-semibold">Dataset Summary</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <DataStatCard 
+                    icon={<FileText className="h-4 w-4" />}
+                    label="Rows" 
+                    value={processedData.summary.rowCount} 
+                  />
+                  <DataStatCard 
+                    icon={<Database className="h-4 w-4" />}
+                    label="Columns" 
+                    value={processedData.headers.length} 
+                  />
+                  <DataStatCard 
+                    icon={<BarChart className="h-4 w-4" />}
+                    label="Numeric Variables" 
+                    value={processedData.summary.numericColumns.length} 
+                  />
+                  <DataStatCard 
+                    icon={<Brain className="h-4 w-4" />}
+                    label="Categorical Variables" 
+                    value={processedData.summary.categoricalColumns.length} 
+                  />
+                </div>
+                
+                {error && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+                    {error}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

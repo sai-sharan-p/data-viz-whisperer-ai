@@ -17,12 +17,42 @@ interface DataVisualizationsProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
 const chartConfig = {
-  value: { theme: { light: '#0088FE', dark: '#0088FE' } },
-  count: { theme: { light: '#00C49F', dark: '#00C49F' } },
-  average: { theme: { light: '#8884d8', dark: '#8884d8' } },
-  median: { theme: { light: '#FFBB28', dark: '#FFBB28' } },
-  min: { theme: { light: '#FF8042', dark: '#FF8042' } },
-  max: { theme: { light: '#8dd1e1', dark: '#8dd1e1' } },
+  value: { 
+    label: 'Value',
+    theme: { light: '#0088FE', dark: '#0088FE' } 
+  },
+  count: { 
+    label: 'Count',
+    theme: { light: '#00C49F', dark: '#00C49F' } 
+  },
+  average: { 
+    label: 'Average',
+    theme: { light: '#8884d8', dark: '#8884d8' } 
+  },
+  median: { 
+    label: 'Median',
+    theme: { light: '#FFBB28', dark: '#FFBB28' } 
+  },
+  min: { 
+    label: 'Minimum',
+    theme: { light: '#FF8042', dark: '#FF8042' } 
+  },
+  max: { 
+    label: 'Maximum',
+    theme: { light: '#8dd1e1', dark: '#8dd1e1' } 
+  },
+  q1: { 
+    label: 'Q1',
+    theme: { light: '#a4de6c', dark: '#a4de6c' } 
+  },
+  q3: { 
+    label: 'Q3',
+    theme: { light: '#ffc658', dark: '#ffc658' } 
+  },
+  frequency: { 
+    label: 'Frequency',
+    theme: { light: '#8884d8', dark: '#8884d8' } 
+  },
 };
 
 const DataVisualizations = ({ visualizations, isLoading = false }: DataVisualizationsProps) => {
@@ -179,12 +209,32 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
     );
   };
 
+  const getExtendedChartConfig = () => {
+    const extendedConfig = { ...chartConfig };
+    
+    if (visualization.yAxis) {
+      extendedConfig[visualization.yAxis.toLowerCase()] = {
+        label: visualization.yAxis,
+        theme: { light: '#0088FE', dark: '#0088FE' }
+      };
+    }
+    
+    if (visualization.xAxis) {
+      extendedConfig[visualization.xAxis.toLowerCase()] = {
+        label: visualization.xAxis,
+        theme: { light: '#00C49F', dark: '#00C49F' }
+      };
+    }
+    
+    return extendedConfig;
+  };
+
   switch (visualization.type) {
     case 'bar':
       return (
         <ChartContainer 
           className="w-full h-full" 
-          config={chartConfig}
+          config={getExtendedChartConfig()}
         >
           <BarChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -199,9 +249,11 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               tick={{ fontSize: 12 }} 
               label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
             />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend content={<ChartLegendContent />} />
-            <Bar dataKey="value" name={visualization.yAxis} />
+            <ChartTooltip content={<ChartTooltipContent 
+              formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} 
+            />} />
+            <Legend content={<ChartLegendContent nameKey={visualization.yAxis || 'value'} />} />
+            <Bar dataKey="value" name={visualization.yAxis || 'Value'} />
           </BarChart>
         </ChartContainer>
       );
@@ -210,7 +262,7 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
       return (
         <ChartContainer 
           className="w-full h-full" 
-          config={chartConfig}
+          config={getExtendedChartConfig()}
         >
           <LineChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -224,12 +276,14 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               tick={{ fontSize: 12 }} 
               label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
             />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend content={<ChartLegendContent />} />
+            <ChartTooltip content={<ChartTooltipContent
+              formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} 
+            />} />
+            <Legend content={<ChartLegendContent nameKey="average" />} />
             <Line 
               type="monotone" 
               dataKey="average" 
-              name={visualization.yAxis}
+              name={visualization.yAxis || 'Value'}
               activeDot={{ r: 8 }} 
             />
           </LineChart>
@@ -240,7 +294,7 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
       return (
         <ChartContainer 
           className="w-full h-full" 
-          config={chartConfig}
+          config={getExtendedChartConfig()}
         >
           <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <Pie
@@ -260,8 +314,10 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend content={<ChartLegendContent />} />
+            <ChartTooltip content={<ChartTooltipContent 
+              formatter={(value) => [Number(value).toLocaleString(), 'Count']} 
+            />} />
+            <Legend />
           </PieChart>
         </ChartContainer>
       );

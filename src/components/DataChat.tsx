@@ -75,12 +75,116 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
 
   const generateMockResponse = (query: string, data: ProcessedData): ChatMessage => {
     const lowerQuery = query.toLowerCase();
-    const { headers, summary } = data;
+    const { headers, summary, data: dataRows } = data;
     
     // Check if asking for a specific variable
     const mentionedVariables = headers.filter(header => 
       lowerQuery.includes(header.toLowerCase())
     );
+    
+    // Check for statistical questions
+    if (mentionedVariables.length > 0) {
+      const variable = mentionedVariables[0];
+      
+      // Average/mean questions
+      if (lowerQuery.includes('average') || lowerQuery.includes('mean')) {
+        if (summary.numericColumns.includes(variable)) {
+          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+          
+          return {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `The average ${variable} is ${average.toFixed(2)}.`,
+            timestamp: new Date()
+          };
+        } else {
+          return {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `I can't calculate the average for ${variable} because it's not a numeric column.`,
+            timestamp: new Date()
+          };
+        }
+      }
+      
+      // Min/max questions
+      if (lowerQuery.includes('minimum') || lowerQuery.includes('min')) {
+        if (summary.numericColumns.includes(variable)) {
+          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+          const min = Math.min(...values);
+          
+          return {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `The minimum ${variable} is ${min}.`,
+            timestamp: new Date()
+          };
+        }
+      }
+      
+      if (lowerQuery.includes('maximum') || lowerQuery.includes('max')) {
+        if (summary.numericColumns.includes(variable)) {
+          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+          const max = Math.max(...values);
+          
+          return {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `The maximum ${variable} is ${max}.`,
+            timestamp: new Date()
+          };
+        }
+      }
+      
+      // Count by category
+      if ((lowerQuery.includes('count') || lowerQuery.includes('how many')) && 
+          lowerQuery.includes('by')) {
+        const categoryVars = summary.categoricalColumns.filter(
+          col => mentionedVariables.includes(col) || lowerQuery.includes(col.toLowerCase())
+        );
+        
+        if (categoryVars.length > 0) {
+          const categoryVar = categoryVars[0];
+          const countByCategory: Record<string, number> = {};
+          
+          dataRows.forEach(row => {
+            const category = String(row[categoryVar]);
+            countByCategory[category] = (countByCategory[category] || 0) + 1;
+          });
+          
+          const sortedCategories = Object.entries(countByCategory)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+          
+          let responseContent = `Count by ${categoryVar}:\n\n`;
+          sortedCategories.forEach(([category, count]) => {
+            responseContent += `- ${category}: ${count} (${((count / dataRows.length) * 100).toFixed(1)}%)\n`;
+          });
+          
+          // Create visualization for count by category
+          const visualization: VisualizationData = {
+            type: 'bar',
+            title: `Count by ${categoryVar}`,
+            description: `Distribution of data points across ${categoryVar} categories`,
+            xAxis: categoryVar,
+            yAxis: 'Count',
+            data: sortedCategories.map(([category, count]) => ({
+              category,
+              value: count
+            }))
+          };
+          
+          return {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: responseContent,
+            timestamp: new Date(),
+            visualization
+          };
+        }
+      }
+    }
     
     // Sample basic responses
     if (lowerQuery.includes('how many') && lowerQuery.includes('row')) {
@@ -224,7 +328,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     return {
       id: Date.now().toString(),
       role: 'assistant',
-      content: "I'm here to help you analyze your data. You can ask me to show visualizations, calculate statistics, or provide insights about specific variables.",
+      content: "I'm here to help you analyze your data. You can ask me to show visualizations, calculate statistics like 'average price', 'count by category', or provide insights about specific variables.",
       timestamp: new Date()
     };
   };
@@ -236,10 +340,10 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <XAxis dataKey="category" tick={{ fontSize: 10 }} name={visualization.xAxis} />
+              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
+              <Tooltip formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} />
+              <Legend formatter={(value) => visualization.yAxis || value} />
               <Bar dataKey="value" fill="#8884d8" name={visualization.yAxis || 'Value'} />
             </BarChart>
           </ResponsiveContainer>
@@ -250,10 +354,10 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="timePeriod" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <XAxis dataKey="timePeriod" tick={{ fontSize: 10 }} name={visualization.xAxis} />
+              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
+              <Tooltip formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} />
+              <Legend formatter={(value) => visualization.yAxis || value} />
               <Line type="monotone" dataKey="average" stroke="#8884d8" name={visualization.yAxis || 'Value'} />
             </LineChart>
           </ResponsiveContainer>
@@ -276,8 +380,8 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Tooltip formatter={(value, name) => [Number(value).toLocaleString(), name]} />
+              <Legend formatter={(value) => value} />
             </PieChart>
           </ResponsiveContainer>
         );
@@ -289,8 +393,8 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" dataKey="x" name={visualization.xAxis} tick={{ fontSize: 10 }} />
               <YAxis type="number" dataKey="y" name={visualization.yAxis} tick={{ fontSize: 10 }} />
-              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value) => [value, visualization.yAxis || 'Value']} />
+              <Legend formatter={() => `${visualization.xAxis || 'X'} vs ${visualization.yAxis || 'Y'}`} />
               <Scatter name={`${visualization.xAxis || 'X'} vs ${visualization.yAxis || 'Y'}`} data={visualization.data} fill="#8884d8" />
             </ScatterChart>
           </ResponsiveContainer>
@@ -301,10 +405,13 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="binCenter" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <XAxis dataKey="binCenter" tick={{ fontSize: 10 }} name={visualization.xAxis} />
+              <YAxis tick={{ fontSize: 10 }} name="Frequency" />
+              <Tooltip 
+                formatter={(value) => [value, 'Frequency']}
+                labelFormatter={(label) => `${visualization.xAxis}: ${Number(label).toFixed(2)}`}
+              />
+              <Legend formatter={(value) => 'Frequency'} />
               <Bar dataKey="count" fill="#8884d8" name="Frequency" />
             </BarChart>
           </ResponsiveContainer>
@@ -315,10 +422,10 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <XAxis dataKey="category" tick={{ fontSize: 10 }} name={visualization.xAxis} />
+              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
+              <Tooltip formatter={(value) => [value, 'Median']} />
+              <Legend formatter={(value) => 'Median'} />
               <Bar dataKey="median" fill="#8884d8" name="Median" />
             </BarChart>
           </ResponsiveContainer>
@@ -329,10 +436,10 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category1" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <XAxis dataKey="category1" tick={{ fontSize: 10 }} name={visualization.xAxis} />
+              <YAxis tick={{ fontSize: 10 }} name="Count" />
+              <Tooltip formatter={(value) => [value, 'Count']} />
+              <Legend formatter={(value) => 'Count'} />
               <Bar dataKey="count" fill="#8884d8" name="Count" />
             </BarChart>
           </ResponsiveContainer>
@@ -356,12 +463,14 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     if (summary.numericColumns.length > 0) {
       const numericVar = summary.numericColumns[0];
       suggestions.push(`Show histogram of ${numericVar}`);
-      suggestions.push(`Show trend of ${numericVar}`);
+      suggestions.push(`What is the average ${numericVar}?`);
+      suggestions.push(`What is the maximum ${numericVar}?`);
     }
     
     if (summary.categoricalColumns.length > 0) {
       const catVar = summary.categoricalColumns[0];
       suggestions.push(`Show pie chart of ${catVar}`);
+      suggestions.push(`Count by ${catVar}`);
     }
     
     if (summary.numericColumns.length > 1) {
