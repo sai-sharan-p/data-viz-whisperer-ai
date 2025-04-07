@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { Insight, VisualizationData } from "@/utils/dataAnalysis";
-import { MessageCircle, SendHorizontal, Bot, User, BarChart } from "lucide-react";
+import { MessageCircle, SendHorizontal, Bot, User, BarChart, LineChartIcon, PieChartIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, ScatterChart, Scatter, 
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 
 interface DataChatProps {
   processedData: ProcessedData | null;
@@ -20,6 +22,8 @@ interface ChatMessage {
   timestamp: Date;
   visualization?: VisualizationData;
 }
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -101,33 +105,90 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
         mentionedVariables.length > 0) {
       const variable = mentionedVariables[0];
       
-      // Generate a visualization based on variable type
+      // Generate a visualization based on variable type and query terms
       let visualization: VisualizationData | undefined;
       
       if (summary.numericColumns.includes(variable)) {
-        visualization = {
-          type: 'histogram',
-          title: `Distribution of ${variable}`,
-          description: `Histogram showing the distribution of values for ${variable}`,
-          xAxis: variable,
-          yAxis: 'Frequency',
-          data: Array(10).fill(0).map((_, i) => ({
-            binStart: i * 10,
-            binCenter: i * 10 + 5,
-            binEnd: (i + 1) * 10,
-            count: Math.floor(Math.random() * 100) + 10
-          }))
-        };
+        // Choose visualization type based on query
+        if (lowerQuery.includes('histogram') || lowerQuery.includes('distribution')) {
+          visualization = {
+            type: 'histogram',
+            title: `Distribution of ${variable}`,
+            description: `Histogram showing the distribution of values for ${variable}`,
+            xAxis: variable,
+            yAxis: 'Frequency',
+            data: Array(10).fill(0).map((_, i) => ({
+              binStart: i * 10,
+              binCenter: i * 10 + 5,
+              binEnd: (i + 1) * 10,
+              count: Math.floor(Math.random() * 100) + 10
+            }))
+          };
+        } else if (lowerQuery.includes('line') || lowerQuery.includes('trend')) {
+          visualization = {
+            type: 'line',
+            title: `Trend of ${variable}`,
+            description: `Line chart showing the trend of ${variable}`,
+            xAxis: 'Time Period',
+            yAxis: variable,
+            data: Array(12).fill(0).map((_, i) => ({
+              timePeriod: `Period ${i+1}`,
+              average: Math.floor(Math.random() * 100) + 50
+            }))
+          };
+        } else if (lowerQuery.includes('bar')) {
+          visualization = {
+            type: 'bar',
+            title: `${variable} by Category`,
+            description: `Bar chart showing ${variable} by category`,
+            xAxis: 'Category',
+            yAxis: variable,
+            data: ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'].map(cat => ({
+              category: cat,
+              value: Math.floor(Math.random() * 100) + 20
+            }))
+          };
+        } else {
+          // Default to scatter plot for numeric variables if not specified
+          visualization = {
+            type: 'scatter',
+            title: `${variable} Relationship`,
+            description: `Scatter plot showing relationship with ${variable}`,
+            xAxis: 'Related Variable',
+            yAxis: variable,
+            data: Array(30).fill(0).map((_, i) => ({
+              id: i,
+              x: Math.floor(Math.random() * 100),
+              y: Math.floor(Math.random() * 100)
+            }))
+          };
+        }
       } else if (summary.categoricalColumns.includes(variable)) {
-        visualization = {
-          type: 'pie',
-          title: `Distribution of ${variable}`,
-          description: `Pie chart showing the distribution of categories for ${variable}`,
-          data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
-            category: cat,
-            count: Math.floor(Math.random() * 100) + 10
-          }))
-        };
+        // Choose visualization type based on query
+        if (lowerQuery.includes('pie') || lowerQuery.includes('proportion')) {
+          visualization = {
+            type: 'pie',
+            title: `Distribution of ${variable}`,
+            description: `Pie chart showing the distribution of categories for ${variable}`,
+            data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
+              category: cat,
+              count: Math.floor(Math.random() * 100) + 10
+            }))
+          };
+        } else {
+          // Default to bar chart for categorical variables
+          visualization = {
+            type: 'bar',
+            title: `Distribution of ${variable}`,
+            description: `Bar chart showing the distribution of categories for ${variable}`,
+            xAxis: variable,
+            yAxis: 'Count',
+            data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
+              category: cat,
+              value: Math.floor(Math.random() * 100) + 10
+            }))
+          };
+        }
       }
       
       return {
@@ -168,6 +229,122 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     };
   };
 
+  const renderInChatVisualization = (visualization: VisualizationData) => {
+    switch (visualization.type) {
+      case 'bar':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={visualization.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="category" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Bar dataKey="value" fill="#8884d8" name={visualization.yAxis || 'Value'} />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'line':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={visualization.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="timePeriod" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Line type="monotone" dataKey="average" stroke="#8884d8" name={visualization.yAxis || 'Value'} />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'pie':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={visualization.data}
+                cx="50%"
+                cy="50%"
+                outerRadius={60}
+                dataKey="count"
+                nameKey="category"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              >
+                {visualization.data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'scatter':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <ScatterChart>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" dataKey="x" name={visualization.xAxis} tick={{ fontSize: 10 }} />
+              <YAxis type="number" dataKey="y" name={visualization.yAxis} tick={{ fontSize: 10 }} />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Scatter name={`${visualization.xAxis || 'X'} vs ${visualization.yAxis || 'Y'}`} data={visualization.data} fill="#8884d8" />
+            </ScatterChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'histogram':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={visualization.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="binCenter" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Bar dataKey="count" fill="#8884d8" name="Frequency" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
+      default:
+        return (
+          <div className="text-sm text-muted-foreground py-2">
+            Visualization preview not available
+          </div>
+        );
+    }
+  };
+
+  const getSuggestions = () => {
+    if (!processedData) return [];
+    
+    const { headers, summary } = processedData;
+    const suggestions = [];
+    
+    if (summary.numericColumns.length > 0) {
+      const numericVar = summary.numericColumns[0];
+      suggestions.push(`Show histogram of ${numericVar}`);
+      suggestions.push(`Show trend of ${numericVar}`);
+    }
+    
+    if (summary.categoricalColumns.length > 0) {
+      const catVar = summary.categoricalColumns[0];
+      suggestions.push(`Show pie chart of ${catVar}`);
+    }
+    
+    if (summary.numericColumns.length > 1) {
+      const numVar1 = summary.numericColumns[0];
+      const numVar2 = summary.numericColumns[1];
+      suggestions.push(`Show scatter plot of ${numVar1} vs ${numVar2}`);
+    }
+    
+    return suggestions;
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="py-3">
@@ -200,15 +377,21 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
                     <div className="text-sm whitespace-pre-wrap">{message.content}</div>
                     
                     {message.visualization && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2"
-                        onClick={() => onGenerateVisualization(message.visualization!)}
-                      >
-                        <BarChart className="h-3 w-3 mr-1" />
-                        Show Visualization
-                      </Button>
+                      <div className="mt-3 mb-2 bg-card rounded-md p-2 border">
+                        <div className="text-xs font-medium mb-1">
+                          {message.visualization.title}
+                        </div>
+                        {renderInChatVisualization(message.visualization)}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2 w-full"
+                          onClick={() => onGenerateVisualization(message.visualization!)}
+                        >
+                          <BarChart className="h-3 w-3 mr-1" />
+                          View in Visualizations Tab
+                        </Button>
+                      </div>
                     )}
                     
                     <div className="text-xs opacity-70">
@@ -235,6 +418,26 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
+        
+        {processedData && !messages.some(m => m.id === 'suggestions') && (
+          <div className="px-4 py-2">
+            <div className="text-xs text-muted-foreground mb-2">Try asking:</div>
+            <div className="flex flex-wrap gap-2">
+              {getSuggestions().map((suggestion, index) => (
+                <Button 
+                  key={index}
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setInputMessage(suggestion);
+                  }}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
         
         <div className="p-4 border-t">
           <form

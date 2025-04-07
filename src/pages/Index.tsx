@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -106,7 +105,6 @@ const Index = () => {
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
-      // Don't set analyzedVariable on error
     } finally {
       setIsAnalyzing(false);
     }
@@ -195,14 +193,6 @@ const Index = () => {
                   {error}
                 </div>
               )}
-              
-              <Button
-                className="mt-4"
-                disabled={!selectedVariable || isAnalyzing}
-                onClick={handleAnalyzeData}
-              >
-                {isAnalyzing ? "Analyzing..." : "Analyze Data"}
-              </Button>
             </div>
           </div>
         )}

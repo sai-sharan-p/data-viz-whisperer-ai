@@ -6,8 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, ScatterChart, Scatter, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  Cell, Sector, Rectangle } from "recharts";
+  Cell, Sector, Rectangle, ComposedChart, Area } from "recharts";
 import { useState } from "react";
+import { ChartContainer, ChartTooltipContent, ChartTooltip, ChartLegendContent } from "@/components/ui/chart";
 
 interface DataVisualizationsProps {
   visualizations: VisualizationData[];
@@ -16,8 +17,18 @@ interface DataVisualizationsProps {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
+const chartConfig = {
+  value: { theme: { light: '#0088FE', dark: '#0088FE' } },
+  count: { theme: { light: '#00C49F', dark: '#00C49F' } },
+  average: { theme: { light: '#8884d8', dark: '#8884d8' } },
+  median: { theme: { light: '#FFBB28', dark: '#FFBB28' } },
+  min: { theme: { light: '#FF8042', dark: '#FF8042' } },
+  max: { theme: { light: '#8dd1e1', dark: '#8dd1e1' } },
+};
+
 const DataVisualizations = ({ visualizations, isLoading = false }: DataVisualizationsProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("grid");
 
   if (isLoading) {
     return (
@@ -78,7 +89,7 @@ const DataVisualizations = ({ visualizations, isLoading = false }: DataVisualiza
         </div>
       </div>
       
-      <Tabs defaultValue="grid" className="flex-1">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
         <TabsList className="mb-4">
           <TabsTrigger value="grid">Grid View</TabsTrigger>
           <TabsTrigger value="focus">Focus View</TabsTrigger>
@@ -87,7 +98,10 @@ const DataVisualizations = ({ visualizations, isLoading = false }: DataVisualiza
         <TabsContent value="grid" className="h-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
             {visualizations.map((viz, index) => (
-              <Card key={index} className="overflow-hidden">
+              <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
+                setActiveIndex(index);
+                setActiveTab("focus");
+              }}>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium">{viz.title}</CardTitle>
                 </CardHeader>
@@ -169,51 +183,67 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
   switch (visualization.type) {
     case 'bar':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <BarChart data={visualization.data}>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <BarChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="category" 
+              label={{ value: visualization.xAxis, position: "insideBottom", offset: -10 }}
               tick={{ fontSize: 12 }} 
               interval={0}
               tickFormatter={(value) => value.length > 10 ? `${value.substring(0, 10)}...` : value}
             />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="value" fill="#8884d8" name={visualization.yAxis} />
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend content={<ChartLegendContent />} />
+            <Bar dataKey="value" name={visualization.yAxis} />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       );
     
     case 'line':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <LineChart data={visualization.data}>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <LineChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="timePeriod" 
               tick={{ fontSize: 12 }} 
               interval="preserveStartEnd"
+              label={{ value: visualization.xAxis, position: "insideBottom", offset: -10 }}
             />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Legend />
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend content={<ChartLegendContent />} />
             <Line 
               type="monotone" 
               dataKey="average" 
-              stroke="#8884d8" 
               name={visualization.yAxis}
               activeDot={{ r: 8 }} 
             />
           </LineChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       );
     
     case 'pie':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <PieChart>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <Pie
               activeIndex={activePieIndex}
               activeShape={renderActiveShape}
@@ -225,93 +255,117 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               dataKey="count"
               nameKey="category"
               onMouseEnter={onPieEnter}
+              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
             >
               {visualization.data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend formatter={(value) => `${value}`} />
           </PieChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       );
     
     case 'scatter':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <ScatterChart>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="x" 
               type="number" 
               name={visualization.xAxis} 
+              label={{ value: visualization.xAxis, position: "insideBottom", offset: -10 }}
               tick={{ fontSize: 12 }} 
+              domain={['auto', 'auto']}
             />
             <YAxis 
               dataKey="y" 
               type="number" 
               name={visualization.yAxis} 
+              label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
               tick={{ fontSize: 12 }} 
+              domain={['auto', 'auto']}
             />
-            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <ChartTooltip 
+              cursor={{ strokeDasharray: '3 3' }} 
+              content={<ChartTooltipContent />}
+            />
+            <Legend content={<ChartLegendContent />} />
             <Scatter 
               name={`${visualization.xAxis} vs ${visualization.yAxis}`} 
               data={visualization.data} 
               fill="#8884d8" 
             />
           </ScatterChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       );
     
     case 'histogram':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <BarChart data={visualization.data}>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <BarChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="binCenter" 
               tick={{ fontSize: 12 }} 
               tickFormatter={(value) => value.toFixed(1)}
-              name={visualization.xAxis}
+              label={{ value: visualization.xAxis, position: "insideBottom", offset: -10 }}
             />
-            <YAxis tick={{ fontSize: 12 }} name="Frequency" />
-            <Tooltip 
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              label={{ value: "Frequency", angle: -90, position: "insideLeft" }}
+            />
+            <ChartTooltip 
               formatter={(value, name, props) => [value, 'Frequency']}
               labelFormatter={(label) => `${visualization.xAxis}: ${Number(label).toFixed(2)}`}
+              content={<ChartTooltipContent />}
             />
-            <Bar dataKey="count" fill="#8884d8" name="Frequency">
+            <Legend content={<ChartLegendContent />} />
+            <Bar dataKey="count" name="Frequency">
               <Cell fill="#8884d8" />
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       );
     
     case 'box':
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
-          <BarChart
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <ComposedChart
             data={visualization.data}
             layout="vertical"
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 70, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" domain={['dataMin', 'dataMax']} />
+            <XAxis 
+              type="number" 
+              domain={['dataMin', 'dataMax']} 
+              label={{ value: visualization.yAxis, position: "insideBottom", offset: -10 }}
+            />
             <YAxis 
               dataKey="category" 
               type="category" 
               tick={{ fontSize: 12 }} 
-              width={100}
+              width={70}
+              label={{ value: "Category", angle: -90, position: "insideLeft", offset: -60 }}
             />
-            <Tooltip 
+            <ChartTooltip 
               formatter={(value, name, props) => [value, name === 'median' ? 'Median' : name]}
               labelFormatter={(label) => `Category: ${label}`}
+              content={<ChartTooltipContent />}
             />
-            <Legend />
-            <Bar 
-              dataKey="median" 
-              fill="#8884d8" 
-              name="Median" 
-              isAnimationActive={false}
-            />
+            <Legend content={<ChartLegendContent />} />
             <Bar 
               dataKey="min" 
               name="Min" 
@@ -330,7 +384,8 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
             />
             <Bar 
               dataKey="q1" 
-              name="Q1" 
+              stackId="a"
+              name="Q1"
               fill="#8884d8" 
               fillOpacity={0.2}
               stroke="#8884d8"
@@ -338,14 +393,22 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
             />
             <Bar 
               dataKey="q3" 
-              name="Q3" 
+              stackId="a"
+              name="Q3"
               fill="#8884d8" 
               fillOpacity={0.2}
               stroke="#8884d8"
               isAnimationActive={false}
             />
-          </BarChart>
-        </ResponsiveContainer>
+            <Line 
+              dataKey="median" 
+              name="Median"
+              stroke="#FF8042"
+              strokeWidth={2}
+              dot={{ fill: '#FF8042', r: 6 }}
+            />
+          </ComposedChart>
+        </ChartContainer>
       );
     
     case 'heatmap':
@@ -370,11 +433,14 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
       const maxValue = Math.max(...visualization.data.map(item => item.count));
       
       return (
-        <ResponsiveContainer width="100%" height={heightAuto ? "100%" : 240}>
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
           <BarChart
             data={gridData}
             layout="vertical"
-            margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 70, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
@@ -388,11 +454,14 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               tick={{ fontSize: 10 }} 
               width={70}
               tickFormatter={(value) => value.length > 10 ? `${value.substring(0, 10)}...` : value}
+              label={{ value: visualization.xAxis, angle: -90, position: "insideLeft", offset: -60 }}
             />
-            <Tooltip 
+            <ChartTooltip 
               formatter={(value, name, props) => [value, name]}
               labelFormatter={(label) => `${visualization.xAxis}: ${label}`}
+              content={<ChartTooltipContent />}
             />
+            <Legend content={<ChartLegendContent />} />
             {uniqueCategories2.map((category, index) => (
               <Bar 
                 key={category}
@@ -410,7 +479,32 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               </Bar>
             ))}
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
+      );
+    
+    case 'area':
+      return (
+        <ChartContainer 
+          className="w-full h-full" 
+          config={chartConfig}
+        >
+          <ComposedChart data={visualization.data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="category" 
+              tick={{ fontSize: 12 }} 
+              label={{ value: visualization.xAxis, position: "insideBottom", offset: -10 }}
+            />
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              label={{ value: visualization.yAxis, angle: -90, position: "insideLeft" }}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend content={<ChartLegendContent />} />
+            <Area type="monotone" dataKey="value" fill="#8884d8" stroke="#8884d8" name={visualization.yAxis} />
+            <Line type="monotone" dataKey="value" stroke="#ff7300" name={`${visualization.yAxis} Trend`} />
+          </ComposedChart>
+        </ChartContainer>
       );
     
     default:
