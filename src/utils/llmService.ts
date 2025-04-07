@@ -30,33 +30,33 @@ export const chatWithLLM = async (
   chatHistory: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<LLMChatResponse> => {
   try {
-    // Currently we have a mock implementation
-    // When deploying, replace with actual API call
+    Currently we have a mock implementation
+    When deploying, replace with actual API call
     
-    // Sample API call structure:
-    // const response = await fetch('YOUR_LLM_API_ENDPOINT', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${process.env.LLM_API_KEY}`
-    //   },
-    //   body: JSON.stringify({
-    //     message: userMessage,
-    //     datasetSummary: {
-    //       headers: processedData.headers,
-    //       rowCount: processedData.summary.rowCount,
-    //       numericColumns: processedData.summary.numericColumns,
-    //       categoricalColumns: processedData.summary.categoricalColumns,
-    //       sample: processedData.data.slice(0, 5) // Send sample data
-    //     },
-    //     chatHistory: chatHistory
-    //   } as LLMChatRequest)
-    // });
-    // 
-    // if (!response.ok) {
-    //   throw new Error(`LLM API error: ${response.status}`);
-    // }
-    // return await response.json() as LLMChatResponse;
+    Sample API call structure:
+    const response = await fetch('YOUR_LLM_API_ENDPOINT', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM}`
+    },
+    body: JSON.stringify({
+    message: userMessage,
+    datasetSummary: {
+    headers: processedData.headers,
+    rowCount: processedData.summary.rowCount,
+    numericColumns: processedData.summary.numericColumns,
+    categoricalColumns: processedData.summary.categoricalColumns,
+    sample: processedData.data.slice(0, 5) // Send sample data
+    },
+    chatHistory: chatHistory
+    } as LLMChatRequest)
+    });
+    
+    if (!response.ok) {
+    throw new Error(`LLM API error: ${response.status}`);
+    }
+    return await response.json() as LLMChatResponse;
     
     console.log("LLM would process:", userMessage, "with data summary:", processedData.summary);
     
