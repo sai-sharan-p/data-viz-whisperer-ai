@@ -18,30 +18,28 @@ const DataTable = ({ processedData }: DataTableProps) => {
     <div className="border rounded-md w-full">
       <ScrollArea className="h-[300px]">
         <div className="w-full overflow-auto">
-          <div className="min-w-max">
-            <Table>
-              <TableHeader>
-                <TableRow>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {headers.map((header) => (
+                  <TableHead key={header} className="font-semibold whitespace-nowrap">
+                    {header}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayData.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
                   {headers.map((header) => (
-                    <TableHead key={header} className="font-semibold whitespace-nowrap">
-                      {header}
-                    </TableHead>
+                    <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap">
+                      {row[header] !== undefined ? String(row[header]) : ''}
+                    </TableCell>
                   ))}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
-                    {headers.map((header) => (
-                      <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap">
-                        {row[header] !== undefined ? String(row[header]) : ''}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
         
         {data.length > MAX_ROWS && (
