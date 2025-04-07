@@ -139,7 +139,7 @@ const Index = () => {
         <div className="inline-flex items-center justify-center p-2 bg-dataviz-teal/10 rounded-full mb-4">
           <FileBarChart className="h-8 w-8 text-dataviz-teal" />
         </div>
-        <h1 className="text-3xl font-bold text-dataviz-blue mb-2">Data Viz Whisperer</h1>
+        <h1 className="text-3xl font-bold text-dataviz-blue mb-2">Data Analytics Assistant</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Upload your data, select variables to analyze, and discover insights through powerful visualizations.
         </p>

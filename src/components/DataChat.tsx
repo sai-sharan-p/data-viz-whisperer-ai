@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { Insight, VisualizationData } from "@/utils/dataAnalysis";
-import { MessageCircle, SendHorizontal, Bot, User, BarChart as BarChartIcon, LineChartIcon, PieChartIcon } from "lucide-react";
+import { MessageCircle, SendHorizontal, Bot, User, BarChartIcon, LineChartIcon, PieChartIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, ScatterChart, Scatter, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
@@ -24,6 +24,14 @@ interface ChatMessage {
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+
+// This function will be replaced with an actual LLM API call in production
+const callLLMApi = async (query: string, data: ProcessedData): Promise<ChatMessage> => {
+  // This is a mock implementation that will be replaced with a real API call
+  console.log('LLM would be called with:', { query, dataStructure: data.headers });
+  
+  return generateMockResponse(query, data);
+};
 
 const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -46,7 +54,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim() || !processedData) return;
     
     const userMessage: ChatMessage = {
@@ -60,277 +68,25 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     setInputMessage('');
     setIsLoading(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      const response = generateMockResponse(inputMessage, processedData);
+    try {
+      // In production, this will be replaced with a real API call to an LLM
+      const response = await callLLMApi(inputMessage, processedData);
       setMessages((prev) => [...prev, response]);
       
       if (response.visualization) {
         onGenerateVisualization(response.visualization);
       }
-      
+    } catch (error) {
+      console.error('Error getting response from LLM:', error);
+      setMessages((prev) => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        timestamp: new Date()
+      }]);
+    } finally {
       setIsLoading(false);
-    }, 1200);
-  };
-
-  const generateMockResponse = (query: string, data: ProcessedData): ChatMessage => {
-    const lowerQuery = query.toLowerCase();
-    const { headers, summary, data: dataRows } = data;
-    
-    // Check if asking for a specific variable
-    const mentionedVariables = headers.filter(header => 
-      lowerQuery.includes(header.toLowerCase())
-    );
-    
-    // Check for statistical questions
-    if (mentionedVariables.length > 0) {
-      const variable = mentionedVariables[0];
-      
-      // Average/mean questions
-      if (lowerQuery.includes('average') || lowerQuery.includes('mean')) {
-        if (summary.numericColumns.includes(variable)) {
-          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
-          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-          
-          return {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: `The average ${variable} is ${average.toFixed(2)}.`,
-            timestamp: new Date()
-          };
-        } else {
-          return {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: `I can't calculate the average for ${variable} because it's not a numeric column.`,
-            timestamp: new Date()
-          };
-        }
-      }
-      
-      // Min/max questions
-      if (lowerQuery.includes('minimum') || lowerQuery.includes('min')) {
-        if (summary.numericColumns.includes(variable)) {
-          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
-          const min = Math.min(...values);
-          
-          return {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: `The minimum ${variable} is ${min}.`,
-            timestamp: new Date()
-          };
-        }
-      }
-      
-      if (lowerQuery.includes('maximum') || lowerQuery.includes('max')) {
-        if (summary.numericColumns.includes(variable)) {
-          const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
-          const max = Math.max(...values);
-          
-          return {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: `The maximum ${variable} is ${max}.`,
-            timestamp: new Date()
-          };
-        }
-      }
-      
-      // Count by category
-      if ((lowerQuery.includes('count') || lowerQuery.includes('how many')) && 
-          lowerQuery.includes('by')) {
-        const categoryVars = summary.categoricalColumns.filter(
-          col => mentionedVariables.includes(col) || lowerQuery.includes(col.toLowerCase())
-        );
-        
-        if (categoryVars.length > 0) {
-          const categoryVar = categoryVars[0];
-          const countByCategory: Record<string, number> = {};
-          
-          dataRows.forEach(row => {
-            const category = String(row[categoryVar]);
-            countByCategory[category] = (countByCategory[category] || 0) + 1;
-          });
-          
-          const sortedCategories = Object.entries(countByCategory)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-          
-          let responseContent = `Count by ${categoryVar}:\n\n`;
-          sortedCategories.forEach(([category, count]) => {
-            responseContent += `- ${category}: ${count} (${((count / dataRows.length) * 100).toFixed(1)}%)\n`;
-          });
-          
-          // Create visualization for count by category
-          const visualization: VisualizationData = {
-            type: 'bar',
-            title: `Count by ${categoryVar}`,
-            description: `Distribution of data points across ${categoryVar} categories`,
-            xAxis: categoryVar,
-            yAxis: 'Count',
-            data: sortedCategories.map(([category, count]) => ({
-              category,
-              value: count
-            }))
-          };
-          
-          return {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: responseContent,
-            timestamp: new Date(),
-            visualization
-          };
-        }
-      }
     }
-    
-    // Sample basic responses
-    if (lowerQuery.includes('how many') && lowerQuery.includes('row')) {
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `Your dataset has ${summary.rowCount} rows of data.`,
-        timestamp: new Date()
-      };
-    }
-    
-    if (lowerQuery.includes('columns') || lowerQuery.includes('variables')) {
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `Your dataset has ${headers.length} columns: ${headers.join(', ')}.`,
-        timestamp: new Date()
-      };
-    }
-    
-    if ((lowerQuery.includes('show') || lowerQuery.includes('create') || lowerQuery.includes('visualize') || lowerQuery.includes('plot')) && 
-        mentionedVariables.length > 0) {
-      const variable = mentionedVariables[0];
-      
-      // Generate a visualization based on variable type and query terms
-      let visualization: VisualizationData | undefined;
-      
-      if (summary.numericColumns.includes(variable)) {
-        // Choose visualization type based on query
-        if (lowerQuery.includes('histogram') || lowerQuery.includes('distribution')) {
-          visualization = {
-            type: 'histogram',
-            title: `Distribution of ${variable}`,
-            description: `Histogram showing the distribution of values for ${variable}`,
-            xAxis: variable,
-            yAxis: 'Frequency',
-            data: Array(10).fill(0).map((_, i) => ({
-              binStart: i * 10,
-              binCenter: i * 10 + 5,
-              binEnd: (i + 1) * 10,
-              count: Math.floor(Math.random() * 100) + 10
-            }))
-          };
-        } else if (lowerQuery.includes('line') || lowerQuery.includes('trend')) {
-          visualization = {
-            type: 'line',
-            title: `Trend of ${variable}`,
-            description: `Line chart showing the trend of ${variable}`,
-            xAxis: 'Time Period',
-            yAxis: variable,
-            data: Array(12).fill(0).map((_, i) => ({
-              timePeriod: `Period ${i+1}`,
-              average: Math.floor(Math.random() * 100) + 50
-            }))
-          };
-        } else if (lowerQuery.includes('bar')) {
-          visualization = {
-            type: 'bar',
-            title: `${variable} by Category`,
-            description: `Bar chart showing ${variable} by category`,
-            xAxis: 'Category',
-            yAxis: variable,
-            data: ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'].map(cat => ({
-              category: cat,
-              value: Math.floor(Math.random() * 100) + 20
-            }))
-          };
-        } else {
-          // Default to scatter plot for numeric variables if not specified
-          visualization = {
-            type: 'scatter',
-            title: `${variable} Relationship`,
-            description: `Scatter plot showing relationship with ${variable}`,
-            xAxis: 'Related Variable',
-            yAxis: variable,
-            data: Array(30).fill(0).map((_, i) => ({
-              id: i,
-              x: Math.floor(Math.random() * 100),
-              y: Math.floor(Math.random() * 100)
-            }))
-          };
-        }
-      } else if (summary.categoricalColumns.includes(variable)) {
-        // Choose visualization type based on query
-        if (lowerQuery.includes('pie') || lowerQuery.includes('proportion')) {
-          visualization = {
-            type: 'pie',
-            title: `Distribution of ${variable}`,
-            description: `Pie chart showing the distribution of categories for ${variable}`,
-            data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
-              category: cat,
-              count: Math.floor(Math.random() * 100) + 10
-            }))
-          };
-        } else {
-          // Default to bar chart for categorical variables
-          visualization = {
-            type: 'bar',
-            title: `Distribution of ${variable}`,
-            description: `Bar chart showing the distribution of categories for ${variable}`,
-            xAxis: variable,
-            yAxis: 'Count',
-            data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
-              category: cat,
-              value: Math.floor(Math.random() * 100) + 10
-            }))
-          };
-        }
-      }
-      
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `Here's a visualization for the ${variable} variable:`,
-        timestamp: new Date(),
-        visualization
-      };
-    }
-    
-    if (lowerQuery.includes('insight') || lowerQuery.includes('tell me about')) {
-      let content = "Based on my analysis of your data:";
-      
-      if (mentionedVariables.length > 0) {
-        const variable = mentionedVariables[0];
-        content = `Based on my analysis of ${variable}:`;
-      }
-      
-      content += "\n\n1. There appears to be a correlation between customer age and purchase amount.\n\n";
-      content += "2. The most common category is 'Electronics', comprising 42% of all purchases.\n\n";
-      content += "3. There is a seasonal pattern in sales with peaks in November and December.";
-      
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content,
-        timestamp: new Date()
-      };
-    }
-    
-    // Default response
-    return {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: "I'm here to help you analyze your data. You can ask me to show visualizations, calculate statistics like 'average price', 'count by category', or provide insights about specific variables.",
-      timestamp: new Date()
-    };
   };
 
   const renderInChatVisualization = (visualization: VisualizationData) => {
@@ -340,10 +96,17 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" tick={{ fontSize: 10 }} name={visualization.xAxis} />
-              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
+              <XAxis 
+                dataKey="category" 
+                tick={{ fontSize: 10 }} 
+                label={{ value: visualization.xAxis, position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                tick={{ fontSize: 10 }} 
+                label={{ value: visualization.yAxis, angle: -90, position: 'insideLeft' }}
+              />
               <Tooltip formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} />
-              <Legend formatter={(value) => visualization.yAxis || value} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
               <Bar dataKey="value" fill="#8884d8" name={visualization.yAxis || 'Value'} />
             </BarChart>
           </ResponsiveContainer>
@@ -354,10 +117,17 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="timePeriod" tick={{ fontSize: 10 }} name={visualization.xAxis} />
-              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
+              <XAxis 
+                dataKey="timePeriod" 
+                tick={{ fontSize: 10 }} 
+                label={{ value: visualization.xAxis, position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                tick={{ fontSize: 10 }} 
+                label={{ value: visualization.yAxis, angle: -90, position: 'insideLeft' }}
+              />
               <Tooltip formatter={(value) => [Number(value).toLocaleString(), visualization.yAxis || 'Value']} />
-              <Legend formatter={(value) => visualization.yAxis || value} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
               <Line type="monotone" dataKey="average" stroke="#8884d8" name={visualization.yAxis || 'Value'} />
             </LineChart>
           </ResponsiveContainer>
@@ -381,7 +151,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
                 ))}
               </Pie>
               <Tooltip formatter={(value, name) => [Number(value).toLocaleString(), name]} />
-              <Legend formatter={(value) => value} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
             </PieChart>
           </ResponsiveContainer>
         );
@@ -391,10 +161,22 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" dataKey="x" name={visualization.xAxis} tick={{ fontSize: 10 }} />
-              <YAxis type="number" dataKey="y" name={visualization.yAxis} tick={{ fontSize: 10 }} />
+              <XAxis 
+                type="number" 
+                dataKey="x" 
+                name={visualization.xAxis} 
+                tick={{ fontSize: 10 }}
+                label={{ value: visualization.xAxis, position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                type="number" 
+                dataKey="y" 
+                name={visualization.yAxis} 
+                tick={{ fontSize: 10 }}
+                label={{ value: visualization.yAxis, angle: -90, position: 'insideLeft' }}
+              />
               <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value) => [value, visualization.yAxis || 'Value']} />
-              <Legend formatter={() => `${visualization.xAxis || 'X'} vs ${visualization.yAxis || 'Y'}`} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
               <Scatter name={`${visualization.xAxis || 'X'} vs ${visualization.yAxis || 'Y'}`} data={visualization.data} fill="#8884d8" />
             </ScatterChart>
           </ResponsiveContainer>
@@ -405,42 +187,21 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={visualization.data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="binCenter" tick={{ fontSize: 10 }} name={visualization.xAxis} />
-              <YAxis tick={{ fontSize: 10 }} name="Frequency" />
+              <XAxis 
+                dataKey="binCenter" 
+                tick={{ fontSize: 10 }}
+                label={{ value: visualization.xAxis, position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                tick={{ fontSize: 10 }}
+                label={{ value: 'Frequency', angle: -90, position: 'insideLeft' }}
+              />
               <Tooltip 
                 formatter={(value) => [value, 'Frequency']}
                 labelFormatter={(label) => `${visualization.xAxis}: ${Number(label).toFixed(2)}`}
               />
-              <Legend formatter={(value) => 'Frequency'} />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
               <Bar dataKey="count" fill="#8884d8" name="Frequency" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-      
-      case 'box':
-        return (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={visualization.data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" tick={{ fontSize: 10 }} name={visualization.xAxis} />
-              <YAxis tick={{ fontSize: 10 }} name={visualization.yAxis} />
-              <Tooltip formatter={(value) => [value, 'Median']} />
-              <Legend formatter={(value) => 'Median'} />
-              <Bar dataKey="median" fill="#8884d8" name="Median" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-      
-      case 'heatmap':
-        return (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={visualization.data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category1" tick={{ fontSize: 10 }} name={visualization.xAxis} />
-              <YAxis tick={{ fontSize: 10 }} name="Count" />
-              <Tooltip formatter={(value) => [value, 'Count']} />
-              <Legend formatter={(value) => 'Count'} />
-              <Bar dataKey="count" fill="#8884d8" name="Count" />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -462,15 +223,15 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     
     if (summary.numericColumns.length > 0) {
       const numericVar = summary.numericColumns[0];
-      suggestions.push(`Show histogram of ${numericVar}`);
       suggestions.push(`What is the average ${numericVar}?`);
-      suggestions.push(`What is the maximum ${numericVar}?`);
+      suggestions.push(`Show histogram of ${numericVar}`);
+      suggestions.push(`Show trend of ${numericVar}`);
     }
     
     if (summary.categoricalColumns.length > 0) {
       const catVar = summary.categoricalColumns[0];
-      suggestions.push(`Show pie chart of ${catVar}`);
       suggestions.push(`Count by ${catVar}`);
+      suggestions.push(`Show pie chart of ${catVar}`);
     }
     
     if (summary.numericColumns.length > 1) {
@@ -478,6 +239,8 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       const numVar2 = summary.numericColumns[1];
       suggestions.push(`Show scatter plot of ${numVar1} vs ${numVar2}`);
     }
+    
+    suggestions.push("What insights can you give me about this data?");
     
     return suggestions;
   };
@@ -487,7 +250,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       <CardHeader className="py-3">
         <CardTitle className="text-lg font-medium flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
-          Chat with Your Data
+          Data Analysis Chat
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 p-0 flex flex-col">
@@ -604,6 +367,268 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       </CardContent>
     </Card>
   );
+};
+
+// Export the generateMockResponse function so it can be used by the LLM API function
+// This will be used by the temporary callLLMApi function and will be replaced in production
+const generateMockResponse = (query: string, data: ProcessedData): ChatMessage => {
+  const lowerQuery = query.toLowerCase();
+  const { headers, summary, data: dataRows } = data;
+  
+  // Check if asking for a specific variable
+  const mentionedVariables = headers.filter(header => 
+    lowerQuery.includes(header.toLowerCase())
+  );
+  
+  // Check for statistical questions
+  if (mentionedVariables.length > 0) {
+    const variable = mentionedVariables[0];
+    
+    // Average/mean questions
+    if (lowerQuery.includes('average') || lowerQuery.includes('mean')) {
+      if (summary.numericColumns.includes(variable)) {
+        const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+        
+        return {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `The average ${variable} is ${average.toFixed(2)}.`,
+          timestamp: new Date()
+        };
+      } else {
+        return {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `I can't calculate the average for ${variable} because it's not a numeric column.`,
+          timestamp: new Date()
+        };
+      }
+    }
+    
+    // Min/max questions
+    if (lowerQuery.includes('minimum') || lowerQuery.includes('min')) {
+      if (summary.numericColumns.includes(variable)) {
+        const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+        const min = Math.min(...values);
+        
+        return {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `The minimum ${variable} is ${min}.`,
+          timestamp: new Date()
+        };
+      }
+    }
+    
+    if (lowerQuery.includes('maximum') || lowerQuery.includes('max')) {
+      if (summary.numericColumns.includes(variable)) {
+        const values = dataRows.map(row => Number(row[variable])).filter(val => !isNaN(val));
+        const max = Math.max(...values);
+        
+        return {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `The maximum ${variable} is ${max}.`,
+          timestamp: new Date()
+        };
+      }
+    }
+    
+    // Count by category
+    if ((lowerQuery.includes('count') || lowerQuery.includes('how many')) && 
+        lowerQuery.includes('by')) {
+      const categoryVars = summary.categoricalColumns.filter(
+        col => mentionedVariables.includes(col) || lowerQuery.includes(col.toLowerCase())
+      );
+      
+      if (categoryVars.length > 0) {
+        const categoryVar = categoryVars[0];
+        const countByCategory: Record<string, number> = {};
+        
+        dataRows.forEach(row => {
+          const category = String(row[categoryVar]);
+          countByCategory[category] = (countByCategory[category] || 0) + 1;
+        });
+        
+        const sortedCategories = Object.entries(countByCategory)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+        
+        let responseContent = `Count by ${categoryVar}:\n\n`;
+        sortedCategories.forEach(([category, count]) => {
+          responseContent += `- ${category}: ${count} (${((count / dataRows.length) * 100).toFixed(1)}%)\n`;
+        });
+        
+        // Create visualization for count by category
+        const visualization: VisualizationData = {
+          type: 'bar',
+          title: `Count by ${categoryVar}`,
+          description: `Distribution of data points across ${categoryVar} categories`,
+          xAxis: categoryVar,
+          yAxis: 'Count',
+          data: sortedCategories.map(([category, count]) => ({
+            category,
+            value: count
+          }))
+        };
+        
+        return {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          visualization
+        };
+      }
+    }
+  }
+  
+  // Sample basic responses
+  if (lowerQuery.includes('how many') && lowerQuery.includes('row')) {
+    return {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: `Your dataset has ${summary.rowCount} rows of data.`,
+      timestamp: new Date()
+    };
+  }
+  
+  if (lowerQuery.includes('columns') || lowerQuery.includes('variables')) {
+    return {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: `Your dataset has ${headers.length} columns: ${headers.join(', ')}.`,
+      timestamp: new Date()
+    };
+  }
+  
+  if ((lowerQuery.includes('show') || lowerQuery.includes('create') || lowerQuery.includes('visualize') || lowerQuery.includes('plot')) && 
+      mentionedVariables.length > 0) {
+    const variable = mentionedVariables[0];
+    
+    // Generate a visualization based on variable type and query terms
+    let visualization: VisualizationData | undefined;
+    
+    if (summary.numericColumns.includes(variable)) {
+      // Choose visualization type based on query
+      if (lowerQuery.includes('histogram') || lowerQuery.includes('distribution')) {
+        visualization = {
+          type: 'histogram',
+          title: `Distribution of ${variable}`,
+          description: `Histogram showing the distribution of values for ${variable}`,
+          xAxis: variable,
+          yAxis: 'Frequency',
+          data: Array(10).fill(0).map((_, i) => ({
+            binStart: i * 10,
+            binCenter: i * 10 + 5,
+            binEnd: (i + 1) * 10,
+            count: Math.floor(Math.random() * 100) + 10
+          }))
+        };
+      } else if (lowerQuery.includes('line') || lowerQuery.includes('trend')) {
+        visualization = {
+          type: 'line',
+          title: `Trend of ${variable}`,
+          description: `Line chart showing the trend of ${variable}`,
+          xAxis: 'Time Period',
+          yAxis: variable,
+          data: Array(12).fill(0).map((_, i) => ({
+            timePeriod: `Period ${i+1}`,
+            average: Math.floor(Math.random() * 100) + 50
+          }))
+        };
+      } else if (lowerQuery.includes('bar')) {
+        visualization = {
+          type: 'bar',
+          title: `${variable} by Category`,
+          description: `Bar chart showing ${variable} by category`,
+          xAxis: 'Category',
+          yAxis: variable,
+          data: ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'].map(cat => ({
+            category: cat,
+            value: Math.floor(Math.random() * 100) + 20
+          }))
+        };
+      } else {
+        // Default to scatter plot for numeric variables if not specified
+        visualization = {
+          type: 'scatter',
+          title: `${variable} Relationship`,
+          description: `Scatter plot showing relationship with ${variable}`,
+          xAxis: 'Related Variable',
+          yAxis: variable,
+          data: Array(30).fill(0).map((_, i) => ({
+            id: i,
+            x: Math.floor(Math.random() * 100),
+            y: Math.floor(Math.random() * 100)
+          }))
+        };
+      }
+    } else if (summary.categoricalColumns.includes(variable)) {
+      // Choose visualization type based on query
+      if (lowerQuery.includes('pie') || lowerQuery.includes('proportion')) {
+        visualization = {
+          type: 'pie',
+          title: `Distribution of ${variable}`,
+          description: `Pie chart showing the distribution of categories for ${variable}`,
+          data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
+            category: cat,
+            count: Math.floor(Math.random() * 100) + 10
+          }))
+        };
+      } else {
+        // Default to bar chart for categorical variables
+        visualization = {
+          type: 'bar',
+          title: `Distribution of ${variable}`,
+          description: `Bar chart showing the distribution of categories for ${variable}`,
+          xAxis: variable,
+          yAxis: 'Count',
+          data: ['Category A', 'Category B', 'Category C', 'Category D'].map(cat => ({
+            category: cat,
+            value: Math.floor(Math.random() * 100) + 10
+          }))
+        };
+      }
+    }
+    
+    return {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: `Here's a visualization for the ${variable} variable:`,
+      timestamp: new Date(),
+      visualization
+    };
+  }
+  
+  if (lowerQuery.includes('insight') || lowerQuery.includes('tell me about')) {
+    let content = "Based on my analysis of your data:";
+    
+    if (mentionedVariables.length > 0) {
+      const variable = mentionedVariables[0];
+      content = `Based on my analysis of ${variable}:`;
+    }
+    
+    content += "\n\n1. There appears to be a correlation between customer age and purchase amount.\n\n";
+    content += "2. The most common category is 'Electronics', comprising 42% of all purchases.\n\n";
+    content += "3. There is a seasonal pattern in sales with peaks in November and December.";
+    
+    return {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content,
+      timestamp: new Date()
+    };
+  }
+  
+  // Default response
+  return {
+    id: Date.now().toString(),
+    role: 'assistant',
+    content: "I'm here to help you analyze your data. You can ask me to show visualizations, calculate statistics like 'average price', 'count by category', or provide insights about specific variables.",
+    timestamp: new Date()
+  };
 };
 
 export default DataChat;
