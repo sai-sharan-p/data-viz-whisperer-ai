@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VisualizationData } from "@/utils/dataAnalysis";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -182,7 +183,7 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
     return (
       <g>
         <text x={cx} y={cy - 10} dy={8} textAnchor="middle" fill={fill}>
-          {payload.category}
+          {payload.category || ''}
         </text>
         <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill="#999">
           {`${(percent * 100).toFixed(2)}%`}
@@ -308,7 +309,7 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               dataKey="count"
               nameKey="category"
               onMouseEnter={onPieEnter}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) => `${name || ''}: ${(percent * 100).toFixed(0)}%`}
             >
               {visualization.data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -319,7 +320,12 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               labelKey="category"
             />} />
             <Legend 
-              formatter={(value, entry) => entry.payload.category} 
+              formatter={(value, entry) => {
+                if (entry && entry.payload) {
+                  return entry.payload.category || value;
+                }
+                return value;
+              }} 
               content={<ChartLegendContent nameKey="category" />} 
             />
           </PieChart>
