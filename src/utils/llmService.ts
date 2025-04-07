@@ -33,7 +33,7 @@ export const chatWithLLM = async (
     // Currently we have a mock implementation
     // When deploying, replace with actual API call
     
-    Sample API call structure:
+    //Sample API call structure:
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
     method: 'POST',
     headers: {
