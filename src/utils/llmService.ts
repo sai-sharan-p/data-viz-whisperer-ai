@@ -34,11 +34,11 @@ export const chatWithLLM = async (
     // When deploying, replace with actual API call
     
     //Sample API call structure:
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'), {
     method: 'POST',
     headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.'AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM'}`
+    'Authorization': `Bearer ${process.env.AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM}`
     },
     body: JSON.stringify({
     message: userMessage,
