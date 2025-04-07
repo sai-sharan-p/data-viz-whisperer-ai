@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { Insight, VisualizationData } from "@/utils/dataAnalysis";
-import { MessageCircle, SendHorizontal, Bot, User, BarChart, LineChartIcon, PieChartIcon } from "lucide-react";
+import { MessageCircle, SendHorizontal, Bot, User, BarChart as BarChartIcon, LineChartIcon, PieChartIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, ScatterChart, Scatter, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
@@ -310,6 +310,34 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
           </ResponsiveContainer>
         );
       
+      case 'box':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={visualization.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="category" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Bar dataKey="median" fill="#8884d8" name="Median" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'heatmap':
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={visualization.data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="category1" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Bar dataKey="count" fill="#8884d8" name="Count" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
       default:
         return (
           <div className="text-sm text-muted-foreground py-2">
@@ -388,7 +416,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
                           className="mt-2 w-full"
                           onClick={() => onGenerateVisualization(message.visualization!)}
                         >
-                          <BarChart className="h-3 w-3 mr-1" />
+                          <BarChartIcon className="h-3 w-3 mr-1" />
                           View in Visualizations Tab
                         </Button>
                       </div>

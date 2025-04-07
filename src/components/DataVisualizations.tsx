@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VisualizationData } from "@/utils/dataAnalysis";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -262,7 +261,7 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
               ))}
             </Pie>
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend formatter={(value) => `${value}`} />
+            <Legend content={<ChartLegendContent />} />
           </PieChart>
         </ChartContainer>
       );
@@ -412,7 +411,6 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
       );
     
     case 'heatmap':
-      // Create a grid structure for the heatmap
       const uniqueCategories1 = [...new Set(visualization.data.map(item => item.category1))];
       const uniqueCategories2 = [...new Set(visualization.data.map(item => item.category2))];
       
@@ -429,7 +427,6 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
         return row;
       });
       
-      // Find max value for color scaling
       const maxValue = Math.max(...visualization.data.map(item => item.count));
       
       return (

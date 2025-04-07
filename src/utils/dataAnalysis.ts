@@ -17,7 +17,7 @@ export interface Insight {
 }
 
 export interface VisualizationData {
-  type: 'bar' | 'line' | 'pie' | 'scatter' | 'heatmap' | 'box' | 'histogram';
+  type: 'bar' | 'line' | 'pie' | 'scatter' | 'heatmap' | 'box' | 'histogram' | 'area';
   title: string;
   description: string;
   xAxis?: string;
