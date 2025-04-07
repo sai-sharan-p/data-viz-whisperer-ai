@@ -321,7 +321,8 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
             />} />
             <Legend 
               formatter={(value, entry) => {
-                if (entry && entry.payload) {
+                // Fix the type error by properly checking the entry payload
+                if (entry && entry.payload && 'category' in entry.payload) {
                   return entry.payload.category || value;
                 }
                 return value;
