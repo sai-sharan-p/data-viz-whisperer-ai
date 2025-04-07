@@ -1,73 +1,100 @@
-# Welcome to your Lovable project
 
-## Project info
+# Data Analytics Assistant
 
-**URL**: https://lovable.dev/projects/e3631a29-f1f6-490f-922b-3027b789e5d6
+A React-based data analytics application that helps users analyze and visualize their data through an interactive chat interface.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- File upload support for CSV and Excel data
+- Data table display with pagination
+- Interactive visualizations (bar charts, line charts, pie charts, scatter plots, etc.)
+- AI-powered chat interface for querying and analyzing data
+- Responsive design
 
-**Use Lovable**
+## Deployment Instructions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e3631a29-f1f6-490f-922b-3027b789e5d6) and start prompting.
+### Option 1: Deploy to Vercel
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Create a [Vercel account](https://vercel.com/signup) if you don't have one
+2. Push your code to a GitHub repository
+3. Import your project in Vercel
+4. Configure environment variables:
+   - `VITE_LLM_API_KEY` - Your LLM API key (e.g., OpenAI, Anthropic, etc.)
+   - `VITE_LLM_API_ENDPOINT` - Your LLM API endpoint
 
-**Use your preferred IDE**
+### Option 2: Deploy to Netlify
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Create a [Netlify account](https://app.netlify.com/signup) if you don't have one
+2. Push your code to a GitHub repository
+3. Import your project in Netlify
+4. Configure environment variables in Netlify settings:
+   - `VITE_LLM_API_KEY` - Your LLM API key
+   - `VITE_LLM_API_ENDPOINT` - Your LLM API endpoint
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Option 3: Self-hosting
 
-Follow these steps:
+1. Build the application:
+   ```bash
+   npm run build
+   ```
+2. Host the generated `dist` folder on any static hosting service or server
+3. Set environment variables in your hosting environment
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Integrating an LLM API
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+To connect the chat feature to an LLM API (like OpenAI, Anthropic, or others):
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Open `src/utils/llmService.ts`
+2. Locate the `chatWithLLM` function
+3. Replace the mock implementation with your actual API call
+4. Use the commented example as a guide
+5. Make sure to set your API key in your deployment environment
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+Example integration:
+
+```typescript
+// In src/utils/llmService.ts
+export const chatWithLLM = async (
+  userMessage: string,
+  processedData: ProcessedData,
+  chatHistory: { role: 'user' | 'assistant'; content: string }[]
+): Promise<LLMChatResponse> => {
+  try {
+    const response = await fetch(import.meta.env.VITE_LLM_API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_LLM_API_KEY}`
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        datasetSummary: {
+          headers: processedData.headers,
+          rowCount: processedData.summary.rowCount,
+          numericColumns: processedData.summary.numericColumns,
+          categoricalColumns: processedData.summary.categoricalColumns,
+          sample: processedData.data.slice(0, 5) // Send sample data
+        },
+        chatHistory: chatHistory
+      } as LLMChatRequest)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
+    
+    return await response.json() as LLMChatResponse;
+  } catch (error) {
+    console.error("Error calling LLM API:", error);
+    return {
+      message: "Sorry, I had trouble processing your request. Please try again."
+    };
+  }
+};
 ```
 
-**Edit a file directly in GitHub**
+## Customizing the LLM Integration
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+You can customize the LLM integration based on the specific API you're using. The current implementation is designed to work with most LLM APIs but may need adjustments for specific providers.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e3631a29-f1f6-490f-922b-3027b789e5d6) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For best results, you'll want to tailor the prompt and response handling to your specific use case and LLM provider.

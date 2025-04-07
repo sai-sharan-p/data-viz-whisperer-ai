@@ -316,8 +316,12 @@ const VisualizationComponent = ({ visualization, heightAuto = false }: Visualiza
             </Pie>
             <ChartTooltip content={<ChartTooltipContent 
               formatter={(value) => [Number(value).toLocaleString(), 'Count']} 
+              labelKey="category"
             />} />
-            <Legend />
+            <Legend 
+              formatter={(value, entry) => entry.payload.category} 
+              content={<ChartLegendContent nameKey="category" />} 
+            />
           </PieChart>
         </ChartContainer>
       );

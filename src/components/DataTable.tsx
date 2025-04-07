@@ -16,30 +16,32 @@ const DataTable = ({ processedData }: DataTableProps) => {
   
   return (
     <div className="border rounded-md w-full">
-      <ScrollArea className="h-[300px] w-full">
-        <div className="overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {headers.map((header) => (
-                  <TableHead key={header} className="font-semibold whitespace-nowrap">
-                    {header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+      <ScrollArea className="h-[300px]">
+        <div className="w-full overflow-auto">
+          <div className="min-w-max">
+            <Table>
+              <TableHeader>
+                <TableRow>
                   {headers.map((header) => (
-                    <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap">
-                      {row[header] !== undefined ? String(row[header]) : ''}
-                    </TableCell>
+                    <TableHead key={header} className="font-semibold whitespace-nowrap">
+                      {header}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {displayData.map((row, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {headers.map((header) => (
+                      <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap">
+                        {row[header] !== undefined ? String(row[header]) : ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
         
         {data.length > MAX_ROWS && (
