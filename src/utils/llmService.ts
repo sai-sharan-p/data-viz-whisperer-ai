@@ -38,7 +38,7 @@ export const chatWithLLM = async (
     method: 'POST',
     headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM}`
+    'Authorization': `Bearer ${import.meta.env.AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM}`
     },
     body: JSON.stringify({
     message: userMessage,
