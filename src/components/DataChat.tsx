@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Lightbulb, Send } from "lucide-react";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { chatWithLLM } from "@/utils/llmService";
+import DataVisualizations from "@/components/DataVisualizations";
 
 interface ChatMessage {
   id: string;
