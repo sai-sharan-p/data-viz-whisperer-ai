@@ -1,3 +1,4 @@
+
 import { ProcessedData } from "./fileProcessing";
 import { VisualizationData } from "./dataAnalysis";
 
@@ -31,13 +32,65 @@ export const chatWithLLM = async (
   try {
     console.log("Processing LLM request with message:", userMessage);
     
-    // Try to make an API call to the Gemini API
+    // Check if API key is available
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      console.warn("No Gemini API key found. Please set VITE_GEMINI_API_KEY in your environment variables.");
+      // Show toast message if toast is available
+      throw new Error("API key not configured. Please add your Gemini API key to continue.");
+    }
+    
     try {
+      // Format the dataset information for the AI prompt
+      const datasetInfo = {
+        headers: processedData.headers.join(', '),
+        rowCount: processedData.summary.rowCount,
+        numericColumns: processedData.summary.numericColumns.join(', '),
+        categoricalColumns: processedData.summary.categoricalColumns.join(', '),
+        sampleData: JSON.stringify(processedData.data.slice(0, 5), null, 2)
+      };
+      
+      // Format the chat history
+      const formattedChatHistory = chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+      
+      // Improved prompt for better AI responses
+      const improvedPrompt = `You are a data analysis assistant helping analyze this dataset. 
+Answer this specific question: "${userMessage}"
+
+Dataset summary:
+- Headers: ${datasetInfo.headers}
+- Row count: ${datasetInfo.rowCount}
+- Numeric columns: ${datasetInfo.numericColumns}
+- Categorical columns: ${datasetInfo.categoricalColumns}
+
+Sample data (first 5 rows):
+${datasetInfo.sampleData}
+
+Chat history:
+${formattedChatHistory}
+
+Provide a clear, detailed, and specific answer based on the data provided. 
+If the data supports generating a visualization to answer the question, include visualization data 
+in JSON format at the end of your response wrapped in \`\`\`json and \`\`\` tags.
+
+Visualization should follow this format:
+\`\`\`json
+{
+  "type": "bar|line|pie|scatter",
+  "title": "Visualization Title",
+  "description": "Short description of what this shows",
+  "xAxis": "X axis label if applicable",
+  "yAxis": "Y axis label if applicable",
+  "data": [array of data points in format required by the visualization type]
+}
+\`\`\``;
+
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           contents: [
@@ -45,20 +98,7 @@ export const chatWithLLM = async (
               role: "user",
               parts: [
                 {
-                  text: `Analyze this dataset and answer this question: "${userMessage}"
-                  Dataset summary:
-                  - Headers: ${processedData.headers.join(', ')}
-                  - Row count: ${processedData.summary.rowCount}
-                  - Numeric columns: ${processedData.summary.numericColumns.join(', ')}
-                  - Categorical columns: ${processedData.summary.categoricalColumns.join(', ')}
-                  
-                  Sample data (first 5 rows):
-                  ${JSON.stringify(processedData.data.slice(0, 5), null, 2)}
-                  
-                  Chat history:
-                  ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-                  
-                  Provide a clear and helpful response. If appropriate, include visualization data in JSON format that can be rendered.`
+                  text: improvedPrompt
                 }
               ]
             }
@@ -73,18 +113,24 @@ export const chatWithLLM = async (
       });
       
       if (!response.ok) {
-        throw new Error(`LLM API error: ${response.status}`);
+        const errorData = await response.text();
+        console.error("API Error response:", errorData);
+        throw new Error(`LLM API error: ${response.status} - ${errorData}`);
       }
       
       const result = await response.json();
       console.log("LLM API response:", result);
       
       // Extract the response text
-      const responseText = result.candidates[0]?.content?.parts[0]?.text || 
-        "I couldn't analyze the data properly. Please try asking in a different way.";
+      const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!responseText) {
+        throw new Error("Empty or invalid response from LLM API");
+      }
       
       // Check if there's visualization data in the response
       let visualization: VisualizationData | undefined;
+      let cleanedResponse = responseText;
       
       // Try to extract visualization JSON from the response
       const visualizationMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
@@ -92,34 +138,38 @@ export const chatWithLLM = async (
         try {
           visualization = JSON.parse(visualizationMatch[1]) as VisualizationData;
           // Clean up the response to remove the JSON block
-          const cleanResponse = responseText.replace(/```json\n[\s\S]*?\n```/, 'Here\'s a visualization based on your request:');
-          return {
-            message: cleanResponse,
-            visualization
-          };
+          cleanedResponse = responseText.replace(/```json\n[\s\S]*?\n```/, 'Here\'s a visualization based on your request:');
         } catch (e) {
           console.error("Error parsing visualization JSON:", e);
         }
       }
       
       return {
-        message: responseText
+        message: cleanedResponse,
+        visualization
       };
     } catch (apiError) {
       console.error("API call failed:", apiError);
-      // Fall back to the mock implementation
-      return generateMockResponse(userMessage, processedData, chatHistory);
+      
+      if (apiError.message.includes("API key")) {
+        throw apiError; // Re-throw API key errors to be handled by the UI
+      }
+      
+      // For other errors, try to generate a meaningful message
+      return {
+        message: `I encountered an error while processing your request: ${apiError.message}. Please try again or rephrase your question.`
+      };
     }
     
   } catch (error) {
     console.error("Error in chatWithLLM:", error);
     return {
-      message: "Sorry, I had trouble processing your request. Please try again."
+      message: `Sorry, I had trouble processing your request: ${error.message}`
     };
   }
 };
 
-// This function simulates LLM responses when the API call fails
+// This function is kept for fallback but is separate from the main flow now
 const generateMockResponse = (
   query: string, 
   data: ProcessedData,

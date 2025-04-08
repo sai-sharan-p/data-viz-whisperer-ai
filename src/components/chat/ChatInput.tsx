@@ -7,13 +7,15 @@ import { Send } from "lucide-react";
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, isLoading, disabled = false, placeholder = "Ask a question about your data..." }: ChatInputProps) => {
   const [inputMessage, setInputMessage] = useState('');
 
   const handleSend = () => {
-    if (inputMessage.trim()) {
+    if (inputMessage.trim() && !disabled) {
       onSendMessage(inputMessage);
       setInputMessage('');
     }
@@ -24,17 +26,21 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
       <div className="flex items-center">
         <Input
           type="text"
-          placeholder="Ask a question about your data..."
+          placeholder={placeholder}
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !disabled) {
               handleSend();
             }
           }}
           className="mr-2"
+          disabled={disabled || isLoading}
         />
-        <Button onClick={handleSend} disabled={isLoading}>
+        <Button 
+          onClick={handleSend} 
+          disabled={isLoading || disabled || !inputMessage.trim()}
+        >
           <Send className="h-4 w-4 mr-2" />
           Send
         </Button>
