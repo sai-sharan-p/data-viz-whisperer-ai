@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -6,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle } from "lucide-react";
+import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import VariableSelector from "@/components/VariableSelector";
 import DataVisualizations from "@/components/DataVisualizations";
 import InsightsPanel from "@/components/InsightsPanel";
 import DataChat from "@/components/DataChat";
+import VisualizationBuilder from "@/components/VisualizationBuilder";
 import DataTable from "@/components/DataTable";
 import { ProcessedData, processFile } from "@/utils/fileProcessing";
 import { VisualizationData, Insight, analyzeDataset } from "@/utils/dataAnalysis";
@@ -25,7 +25,7 @@ const Index = () => {
   const [visualizations, setVisualizations] = useState<VisualizationData[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"visualize" | "chat">("visualize");
+  const [activeTab, setActiveTab] = useState<"visualize" | "chat" | "builder">("visualize");
   const [error, setError] = useState<string | null>(null);
   
   const handleFileUpload = async (file: File) => {
@@ -160,7 +160,9 @@ const Index = () => {
           <>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Dataset Preview</h3>
-              <DataTable processedData={processedData} />
+              <div className="overflow-x-auto">
+                <DataTable processedData={processedData} />
+              </div>
             </div>
             
             <div className="grid sm:grid-cols-2 gap-6">
@@ -235,7 +237,7 @@ const Index = () => {
           </Badge>
         </div>
         
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "visualize" | "chat")}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "visualize" | "chat" | "builder")}>
           <TabsList>
             <TabsTrigger value="visualize" className="flex items-center gap-2">
               <BarChart className="h-4 w-4" />
@@ -243,7 +245,11 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
-              Chat
+              Data Chat
+            </TabsTrigger>
+            <TabsTrigger value="builder" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Visualization Builder
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -277,6 +283,13 @@ const Index = () => {
           
           <TabsContent value="chat" className="h-full m-0 p-6">
             <DataChat 
+              processedData={processedData} 
+              onGenerateVisualization={handleGenerateVisualization} 
+            />
+          </TabsContent>
+
+          <TabsContent value="builder" className="h-full m-0 p-6">
+            <VisualizationBuilder 
               processedData={processedData} 
               onGenerateVisualization={handleGenerateVisualization} 
             />

@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Lightbulb } from "lucide-react";
-import DataVisualizations from "@/components/DataVisualizations";
+import { Lightbulb, Send } from "lucide-react";
 import { ProcessedData } from "@/utils/fileProcessing";
 import { chatWithLLM } from "@/utils/llmService";
 
@@ -26,7 +25,7 @@ const SUGGESTIONS = [
   "What are the key trends in the data?",
   "Can you provide a summary of the dataset?",
   "Which variables have the strongest correlation?",
-  "Visualize the distribution of a specific variable.",
+  "What insights can you share about this dataset?",
 ];
 
 const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => {
@@ -40,7 +39,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     const welcomeMessage: ChatMessage = {
       id: 'welcome',
       role: 'assistant',
-      content: "Hello! I'm here to help you analyze your data. What would you like to know or visualize?",
+      content: "Hello! I'm your data chat assistant. I can answer questions about your data and provide insights. What would you like to know?",
     };
     setMessages([welcomeMessage]);
 
@@ -48,7 +47,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     const suggestionMessage: ChatMessage = {
       id: 'suggestions',
       role: 'assistant',
-      content: "Here are some suggestions to get started:",
+      content: "Here are some questions to get started:",
     };
     setMessages(prev => [...prev, suggestionMessage]);
   }, []);
@@ -123,7 +122,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
     }
   };
 
-  const getSuggestions = () => {
+  const renderSuggestions = () => {
     if (messages.find(msg => msg.id === 'suggestions')) {
       return (
         <div className="flex flex-wrap gap-2 mt-2">
@@ -134,7 +133,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
               size="sm"
               onClick={() => {
                 setInputMessage(suggestion);
-                handleSendMessage();
               }}
             >
               <Lightbulb className="mr-2 h-4 w-4" />
@@ -162,14 +160,14 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea ref={chatContainerRef} className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4" ref={chatContainerRef}>
         <div className="flex flex-col gap-4">
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className="flex items-start max-w-[80%]">
                 {message.role === 'assistant' && (
                   <Avatar className="mr-2 mt-0.5">
-                    <AvatarImage src="assistant.png" />
+                    <AvatarImage src="/assistant.png" alt="AI" />
                     <AvatarFallback>AI</AvatarFallback>
                   </Avatar>
                 )}
@@ -183,7 +181,7 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
                 </div>
                 {message.role === 'user' && (
                   <Avatar className="ml-2 mt-0.5">
-                    <AvatarImage src="user.png" />
+                    <AvatarImage src="/user.png" alt="User" />
                     <AvatarFallback>You</AvatarFallback>
                   </Avatar>
                 )}
@@ -194,23 +192,23 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
             <div className="flex justify-start">
               <div className="flex items-start max-w-[80%]">
                 <Avatar className="mr-2 mt-0.5">
-                  <AvatarImage src="assistant.png" />
+                  <AvatarImage src="/assistant.png" alt="AI" />
                   <AvatarFallback>AI</AvatarFallback>
                 </Avatar>
                 <div className="px-4 py-2 rounded-lg bg-muted">
-                  <p className="text-sm">Thinking...</p>
+                  <p className="text-sm">Processing your request...</p>
                 </div>
               </div>
             </div>
           )}
-          {getSuggestions()}
+          {renderSuggestions()}
         </div>
       </ScrollArea>
       <div className="p-4 border-t">
         <div className="flex items-center">
           <Input
             type="text"
-            placeholder="Type your message here..."
+            placeholder="Ask a question about your data..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => {

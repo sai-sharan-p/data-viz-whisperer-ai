@@ -1,4 +1,3 @@
-
 import { ProcessedData } from "./fileProcessing";
 import { VisualizationData } from "./dataAnalysis";
 
@@ -30,48 +29,97 @@ export const chatWithLLM = async (
   chatHistory: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<LLMChatResponse> => {
   try {
-    // Currently we have a mock implementation
-    // When deploying, replace with actual API call
+    console.log("Processing LLM request with message:", userMessage);
     
-    //Sample API call structure:
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        datasetSummary: {
-          headers: processedData.headers,
-          rowCount: processedData.summary.rowCount,
-          numericColumns: processedData.summary.numericColumns,
-          categoricalColumns: processedData.summary.categoricalColumns,
-          sample: processedData.data.slice(0, 5) // Send sample data
+    // Try to make an API call to the Gemini API
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
         },
-        chatHistory: chatHistory
-      } as LLMChatRequest)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`LLM API error: ${response.status}`);
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `Analyze this dataset and answer this question: "${userMessage}"
+                  Dataset summary:
+                  - Headers: ${processedData.headers.join(', ')}
+                  - Row count: ${processedData.summary.rowCount}
+                  - Numeric columns: ${processedData.summary.numericColumns.join(', ')}
+                  - Categorical columns: ${processedData.summary.categoricalColumns.join(', ')}
+                  
+                  Sample data (first 5 rows):
+                  ${JSON.stringify(processedData.data.slice(0, 5), null, 2)}
+                  
+                  Chat history:
+                  ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+                  
+                  Provide a clear and helpful response. If appropriate, include visualization data in JSON format that can be rendered.`
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 1024,
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`LLM API error: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log("LLM API response:", result);
+      
+      // Extract the response text
+      const responseText = result.candidates[0]?.content?.parts[0]?.text || 
+        "I couldn't analyze the data properly. Please try asking in a different way.";
+      
+      // Check if there's visualization data in the response
+      let visualization: VisualizationData | undefined;
+      
+      // Try to extract visualization JSON from the response
+      const visualizationMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
+      if (visualizationMatch && visualizationMatch[1]) {
+        try {
+          visualization = JSON.parse(visualizationMatch[1]) as VisualizationData;
+          // Clean up the response to remove the JSON block
+          const cleanResponse = responseText.replace(/```json\n[\s\S]*?\n```/, 'Here\'s a visualization based on your request:');
+          return {
+            message: cleanResponse,
+            visualization
+          };
+        } catch (e) {
+          console.error("Error parsing visualization JSON:", e);
+        }
+      }
+      
+      return {
+        message: responseText
+      };
+    } catch (apiError) {
+      console.error("API call failed:", apiError);
+      // Fall back to the mock implementation
+      return generateMockResponse(userMessage, processedData, chatHistory);
     }
-    return await response.json() as LLMChatResponse;
     
-    console.log("LLM would process:", userMessage, "with data summary:", processedData.summary);
-    
-    // Currently return a mock response
-    // This will be replaced with the actual LLM API call when deployed
-    return generateMockResponse(userMessage, processedData, chatHistory);
   } catch (error) {
-    console.error("Error calling LLM API:", error);
+    console.error("Error in chatWithLLM:", error);
     return {
       message: "Sorry, I had trouble processing your request. Please try again."
     };
   }
 };
 
-// This function simulates LLM responses - replace it with real API calls when deploying
+// This function simulates LLM responses when the API call fails
 const generateMockResponse = (
   query: string, 
   data: ProcessedData,
