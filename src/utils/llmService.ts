@@ -35,26 +35,26 @@ export const chatWithLLM = async (
     
     //Sample API call structure:
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${import.meta.env.AIzaSyAX5kPEq1MUC-u7GfYy1b3tdAACeghfEfM}`
-    },
-    body: JSON.stringify({
-    message: userMessage,
-    datasetSummary: {
-    headers: processedData.headers,
-    rowCount: processedData.summary.rowCount,
-    numericColumns: processedData.summary.numericColumns,
-    categoricalColumns: processedData.summary.categoricalColumns,
-    sample: processedData.data.slice(0, 5) // Send sample data
-    },
-    chatHistory: chatHistory
-    } as LLMChatRequest)
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        datasetSummary: {
+          headers: processedData.headers,
+          rowCount: processedData.summary.rowCount,
+          numericColumns: processedData.summary.numericColumns,
+          categoricalColumns: processedData.summary.categoricalColumns,
+          sample: processedData.data.slice(0, 5) // Send sample data
+        },
+        chatHistory: chatHistory
+      } as LLMChatRequest)
     });
     
     if (!response.ok) {
-    throw new Error(`LLM API error: ${response.status}`);
+      throw new Error(`LLM API error: ${response.status}`);
     }
     return await response.json() as LLMChatResponse;
     
