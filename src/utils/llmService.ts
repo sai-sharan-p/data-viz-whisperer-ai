@@ -34,6 +34,7 @@ export const chatWithLLM = async (
     
     // Check if API key is available
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log("API Key:", apiKey);
     
     if (!apiKey) {
       console.warn("No Gemini API key found. Please set VITE_GEMINI_API_KEY in your environment variables.");
