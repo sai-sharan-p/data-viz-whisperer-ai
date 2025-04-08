@@ -14,7 +14,6 @@ interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
   visualization?: any;
 }
 
@@ -42,7 +41,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       id: 'welcome',
       role: 'assistant',
       content: "Hello! I'm here to help you analyze your data. What would you like to know or visualize?",
-      timestamp: new Date()
     };
     setMessages([welcomeMessage]);
 
@@ -51,7 +49,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       id: 'suggestions',
       role: 'assistant',
       content: "Here are some suggestions to get started:",
-      timestamp: new Date()
     };
     setMessages(prev => [...prev, suggestionMessage]);
   }, []);
@@ -70,7 +67,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
-      timestamp: new Date()
     };
     
     setMessages((prev) => [...prev, userMessage]);
@@ -103,7 +99,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
         id: Date.now().toString(),
         role: 'assistant',
         content: llmResponse.message,
-        timestamp: new Date(),
         visualization: llmResponse.visualization
       };
       
@@ -120,7 +115,6 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
         id: Date.now().toString(),
         role: 'assistant',
         content: "Sorry, I encountered an error processing your request. Please try again.",
-        timestamp: new Date()
       };
       
       setMessages((prev) => [...prev, errorMessage]);
@@ -171,23 +165,24 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
       <ScrollArea ref={chatContainerRef} className="flex-1 p-4">
         <div className="flex flex-col gap-4">
           {messages.map((message) => (
-            <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-              <div className="flex items-center">
+            <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className="flex items-start max-w-[80%]">
                 {message.role === 'assistant' && (
-                  <Avatar className="mr-2">
+                  <Avatar className="mr-2 mt-0.5">
                     <AvatarImage src="assistant.png" />
                     <AvatarFallback>AI</AvatarFallback>
                   </Avatar>
                 )}
-                <Card className="w-fit max-w-[80%]">
-                  <CardContent className="p-3">
-                    <p className="text-sm">{message.content}</p>
-                    {renderInChatVisualization(message)}
-                    <p className="text-xs text-muted-foreground mt-1">{message.timestamp.toLocaleTimeString()}</p>
-                  </CardContent>
-                </Card>
+                <div className={`px-4 py-2 rounded-lg ${
+                  message.role === 'user' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted'
+                }`}>
+                  <p className="text-sm">{message.content}</p>
+                  {renderInChatVisualization(message)}
+                </div>
                 {message.role === 'user' && (
-                  <Avatar className="ml-2">
+                  <Avatar className="ml-2 mt-0.5">
                     <AvatarImage src="user.png" />
                     <AvatarFallback>You</AvatarFallback>
                   </Avatar>
@@ -196,16 +191,16 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-start">
-              <Avatar className="mr-2">
-                <AvatarImage src="assistant.png" />
-                <AvatarFallback>AI</AvatarFallback>
-              </Avatar>
-              <Card className="w-fit max-w-[80%]">
-                <CardContent className="p-3">
-                  <p className="text-sm">Loading...</p>
-                </CardContent>
-              </Card>
+            <div className="flex justify-start">
+              <div className="flex items-start max-w-[80%]">
+                <Avatar className="mr-2 mt-0.5">
+                  <AvatarImage src="assistant.png" />
+                  <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+                <div className="px-4 py-2 rounded-lg bg-muted">
+                  <p className="text-sm">Thinking...</p>
+                </div>
+              </div>
             </div>
           )}
           {getSuggestions()}
@@ -226,8 +221,8 @@ const DataChat = ({ processedData, onGenerateVisualization }: DataChatProps) => 
             className="mr-2"
           />
           <Button onClick={handleSendMessage} disabled={isLoading}>
-            {isLoading ? 'Sending...' : <Send className="h-4 w-4 mr-2" />}
-            {isLoading ? '' : 'Send'}
+            <Send className="h-4 w-4 mr-2" />
+            Send
           </Button>
         </div>
       </div>

@@ -15,9 +15,9 @@ const DataTable = ({ processedData }: DataTableProps) => {
   const displayData = data.slice(0, MAX_ROWS);
   
   return (
-    <div className="border rounded-md w-full">
+    <div className="border rounded-md w-full overflow-hidden">
       <ScrollArea className="h-[300px]">
-        <div className="w-full overflow-auto">
+        <div className="overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
