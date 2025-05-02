@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Send, AlertTriangle } from "lucide-react";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -40,9 +40,19 @@ const ChatInput = ({ onSendMessage, isLoading, disabled = false, placeholder = "
         <Button 
           onClick={handleSend} 
           disabled={isLoading || disabled || !inputMessage.trim()}
+          className={disabled ? "bg-amber-500 hover:bg-amber-600" : ""}
         >
-          <Send className="h-4 w-4 mr-2" />
-          Send
+          {disabled ? (
+            <>
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              API Key Required
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              Send
+            </>
+          )}
         </Button>
       </div>
     </div>

@@ -14,7 +14,7 @@ const LoadingMessage = () => {
         <div className="px-4 py-2 rounded-lg bg-muted">
           <div className="flex items-center space-x-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <p className="text-sm">Analyzing your data with Google Gemini...</p>
+            <p className="text-sm">Analyzing your data with Google Gemini API...</p>
           </div>
           <p className="text-xs text-muted-foreground mt-1">This might take a moment depending on the complexity of your question</p>
         </div>

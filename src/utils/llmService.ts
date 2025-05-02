@@ -34,11 +34,9 @@ export const chatWithLLM = async (
     
     // Check if API key is available
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    console.log("API Key:", apiKey);
     
     if (!apiKey) {
       console.warn("No Gemini API key found. Please set VITE_GEMINI_API_KEY in your environment variables.");
-      // Show toast message if toast is available
       throw new Error("API key not configured. Please add your Gemini API key to continue.");
     }
     
@@ -87,11 +85,17 @@ Visualization should follow this format:
 }
 \`\`\``;
 
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+      // IMPORTANT: Using proper API key format for Google APIs
+      // The problem is in the Auth header format - it needs to be correctly formatted for Google APIs
+      const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+      console.log("Making request to Gemini API:", apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          // Using the correct format for Google API authentication
+          'x-goog-api-key': apiKey
         },
         body: JSON.stringify({
           contents: [
@@ -113,6 +117,8 @@ Visualization should follow this format:
         })
       });
       
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
         const errorData = await response.text();
         console.error("API Error response:", errorData);
@@ -120,7 +126,7 @@ Visualization should follow this format:
       }
       
       const result = await response.json();
-      console.log("LLM API response:", result);
+      console.log("LLM API response received");
       
       // Extract the response text
       const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -152,7 +158,7 @@ Visualization should follow this format:
     } catch (apiError) {
       console.error("API call failed:", apiError);
       
-      if (apiError.message.includes("API key")) {
+      if (apiError.message && apiError.message.includes("API key")) {
         throw apiError; // Re-throw API key errors to be handled by the UI
       }
       
