@@ -140,7 +140,7 @@ const Index = () => {
       {/* Back to Home Button */}
       <div className="mb-6">
         <Link to="/">
-          <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+          <Button variant="ghost" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Button>
@@ -148,12 +148,12 @@ const Index = () => {
       </div>
 
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-2 bg-blue-100 rounded-full mb-4">
-          <FileBarChart className="h-8 w-8 text-blue-600" />
+        <div className="inline-flex items-center justify-center p-2 bg-emerald-100 rounded-full mb-4">
+          <FileBarChart className="h-8 w-8 text-emerald-600" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Analytics Assistant</h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Upload your data, select variables to analyze, and discover insights through powerful visualizations.
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">FinFlow Analytics</h1>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          Upload your financial data, select variables to analyze, and discover insights through powerful visualizations.
         </p>
       </div>
       
@@ -317,7 +317,7 @@ const Index = () => {
   );
   
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-slate-50">
       {analyzedVariable ? renderAnalysisView() : renderInitialView()}
     </main>
   );
@@ -331,8 +331,8 @@ interface StepIndicatorProps {
 
 const StepIndicator = ({ number, status, label }: StepIndicatorProps) => {
   const bgColor = 
-    status === "complete" ? "bg-dataviz-teal text-white" :
-    status === "current" ? "bg-white border-2 border-dataviz-teal text-dataviz-teal" :
+    status === "complete" ? "bg-emerald-600 text-white" :
+    status === "current" ? "bg-white border-2 border-emerald-600 text-emerald-600" :
     "bg-gray-100 text-gray-400";
   
   return (
@@ -340,7 +340,7 @@ const StepIndicator = ({ number, status, label }: StepIndicatorProps) => {
       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bgColor}`}>
         {number}
       </div>
-      <span className={`text-sm ${status === "upcoming" ? "text-gray-400" : "text-gray-700"}`}>
+      <span className={`text-sm ${status === "upcoming" ? "text-gray-400" : "text-slate-700"}`}>
         {label}
       </span>
     </div>

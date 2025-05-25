@@ -63,12 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				dataviz: {
-					blue: '#1A365D',
-					lightBlue: '#2A4365',
-					teal: '#319795',
-					background: '#F7FAFC',
-					panel: '#EDF2F7',
+				finflow: {
+					primary: '#059669',     // emerald-600
+					secondary: '#0f172a',   // slate-900
+					accent: '#10b981',      // emerald-500
+					background: '#f8fafc',  // slate-50
+					foreground: '#0f172a',  // slate-900
+					muted: '#64748b',       // slate-500
 				}
 			},
 			borderRadius: {
