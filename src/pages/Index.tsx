@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -5,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard } from "lucide-react";
+import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import FileUploader from "@/components/FileUploader";
 import VariableSelector from "@/components/VariableSelector";
 import DataVisualizations from "@/components/DataVisualizations";
@@ -135,12 +137,22 @@ const Index = () => {
   
   const renderInitialView = () => (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Back to Home Button */}
+      <div className="mb-6">
+        <Link to="/">
+          <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-2 bg-dataviz-teal/10 rounded-full mb-4">
-          <FileBarChart className="h-8 w-8 text-dataviz-teal" />
+        <div className="inline-flex items-center justify-center p-2 bg-blue-100 rounded-full mb-4">
+          <FileBarChart className="h-8 w-8 text-blue-600" />
         </div>
-        <h1 className="text-3xl font-bold text-dataviz-blue mb-2">Data Analytics Assistant</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Analytics Assistant</h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Upload your data, select variables to analyze, and discover insights through powerful visualizations.
         </p>
       </div>
@@ -213,8 +225,13 @@ const Index = () => {
   
   const renderAnalysisView = () => (
     <div className="h-screen flex flex-col">
-      <div className="border-b p-4 flex items-center justify-between">
+      <div className="border-b p-4 flex items-center justify-between bg-white">
         <div className="flex items-center gap-2">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="mr-2">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -300,7 +317,7 @@ const Index = () => {
   );
   
   return (
-    <main className="min-h-screen bg-dataviz-background">
+    <main className="min-h-screen bg-gray-50">
       {analyzedVariable ? renderAnalysisView() : renderInitialView()}
     </main>
   );
