@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard } from "lucide-react";
+import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import FileUploader from "@/components/FileUploader";
 import VariableSelector from "@/components/VariableSelector";
 import DataVisualizations from "@/components/DataVisualizations";
@@ -135,6 +136,13 @@ const Index = () => {
   
   const renderInitialView = () => (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link to="/" className="inline-flex items-center gap-2 text-dataviz-teal hover:text-dataviz-teal/80 transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Link>
+      </div>
+      
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center p-2 bg-dataviz-teal/10 rounded-full mb-4">
           <FileBarChart className="h-8 w-8 text-dataviz-teal" />
