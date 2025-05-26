@@ -90,7 +90,7 @@
   }
 
   body {
-    @apply bg-dataviz-background text-foreground;
+    @apply bg-slate-50 text-foreground;
   }
 }
 
