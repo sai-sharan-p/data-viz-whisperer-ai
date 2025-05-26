@@ -34,7 +34,7 @@ const Home = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-                FinFlow: Stop Drowning in Spreadsheets. Craft Leadership-Ready Financial Reports in{" "}
+                FinFlow: Craft Leadership-Ready Financial Reports in{" "}
                 <span className="text-emerald-600">Minutes.</span>
               </h1>
               <p className="text-xl text-slate-600 mb-8 leading-relaxed">
