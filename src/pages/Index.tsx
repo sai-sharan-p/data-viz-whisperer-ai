@@ -115,7 +115,7 @@ const Index = () => {
   
   const handleGenerateVisualization = (visualization: VisualizationData) => {
     setVisualizations(prev => [visualization, ...prev]);
-    setActiveTab("visualize");
+    setActiveTab("trends");
     
     toast({
       title: "Visualization generated",
