@@ -171,7 +171,7 @@ const Index = () => {
           <>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Dataset Preview</h3>
-              <div className="w-full">
+              <div className="w-full overflow-hidden">
                 <DataTable processedData={processedData} />
               </div>
             </div>
