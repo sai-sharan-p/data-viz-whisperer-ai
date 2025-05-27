@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import DataVisualizations from "@/components/DataVisualizations";
 
 export interface ChatMessageProps {
   id: string;
@@ -12,19 +10,6 @@ export interface ChatMessageProps {
 }
 
 const ChatMessage = ({ message }: { message: ChatMessageProps }) => {
-  const renderInChatVisualization = () => {
-    if (message.visualization) {
-      return (
-        <Card className="w-full mt-2">
-          <CardContent className="p-2 h-64">
-            <DataVisualizations visualizations={[message.visualization]} />
-          </CardContent>
-        </Card>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
       <div className="flex items-start max-w-[80%]">
@@ -39,8 +24,7 @@ const ChatMessage = ({ message }: { message: ChatMessageProps }) => {
             ? 'bg-primary text-primary-foreground' 
             : 'bg-muted'
         }`}>
-          <p className="text-sm">{message.content}</p>
-          {renderInChatVisualization()}
+          <p className="text-sm whitespace-pre-line">{message.content}</p>
         </div>
         {message.role === 'user' && (
           <Avatar className="ml-2 mt-0.5">

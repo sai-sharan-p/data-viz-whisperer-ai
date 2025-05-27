@@ -64,9 +64,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				finflow: {
-					primary: '#059669',     // emerald-600
+					primary: '#2563eb',     // blue-600
 					secondary: '#0f172a',   // slate-900
-					accent: '#10b981',      // emerald-500
+					accent: '#3b82f6',      // blue-500
 					background: '#f8fafc',  // slate-50
 					foreground: '#0f172a',  // slate-900
 					muted: '#64748b',       // slate-500

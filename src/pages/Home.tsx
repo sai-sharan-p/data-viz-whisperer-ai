@@ -12,7 +12,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                 <BarChart className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold">FinFlow</span>
@@ -34,15 +34,15 @@ const Home = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-                FinFlow: Craft Leadership-Ready Financial Reports in{" "}
-                <span className="text-emerald-600">Minutes.</span>
+                FinFlow: Stop Drowning in Spreadsheets. Craft Leadership-Ready Financial Reports in{" "}
+                <span className="text-blue-600">Minutes.</span>
               </h1>
               <p className="text-xl text-slate-600 mb-8 leading-relaxed">
                 Empower your finance team to instantly analyze data, visualize key metrics, and generate 
                 insightful reports for leadership—without the usual manual grind.
               </p>
               <Link to="/analytics">
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg rounded-lg">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-lg">
                   Get Started
                 </Button>
               </Link>
@@ -64,11 +64,11 @@ const Home = () => {
                     </div>
                     
                     {/* Chart placeholder */}
-                    <div className="h-40 bg-gradient-to-r from-emerald-100 to-slate-100 rounded-lg flex items-center justify-center relative">
+                    <div className="h-40 bg-gradient-to-r from-blue-100 to-slate-100 rounded-lg flex items-center justify-center relative">
                       <svg className="w-full h-full" viewBox="0 0 300 120">
                         <polyline
                           fill="none"
-                          stroke="#059669"
+                          stroke="#2563eb"
                           strokeWidth="2"
                           points="10,80 50,60 90,70 130,40 170,45 210,35 250,50 290,30"
                         />
@@ -81,7 +81,7 @@ const Home = () => {
                         />
                       </svg>
                       <div className="absolute bottom-2 right-2 bg-white rounded px-2 py-1 text-xs shadow">
-                        <span className="text-emerald-600">● Trend</span>
+                        <span className="text-blue-600">● Trend</span>
                         <span className="text-slate-600 ml-2">● Expected</span>
                       </div>
                     </div>
@@ -89,7 +89,7 @@ const Home = () => {
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="text-slate-500">Growth</p>
-                        <p className="font-semibold text-emerald-600">+2.4%</p>
+                        <p className="font-semibold text-blue-600">+2.4%</p>
                       </div>
                       <div>
                         <p className="text-slate-500">Variance</p>
@@ -165,7 +165,7 @@ const Home = () => {
       </section>
 
       {/* Section 3: Key Benefits & Features */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-emerald-50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-blue-50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
             How We Help You Shine
@@ -174,15 +174,15 @@ const Home = () => {
             <Card className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 rounded-lg">
-                    <Zap className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Zap className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">Accelerate Reporting Cycles</h3>
                     <p className="text-slate-600 mb-3">
                       Go from raw data to polished report in minutes, not hours or days.
                     </p>
-                    <p className="text-sm text-emerald-600 font-medium">
+                    <p className="text-sm text-blue-600 font-medium">
                       Feature: Upload your financial data (CSV, Excel), and let our smart system guide you.
                     </p>
                   </div>
@@ -193,15 +193,15 @@ const Home = () => {
             <Card className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 rounded-lg">
-                    <BarChart className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <BarChart className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">Visualize with Impact</h3>
                     <p className="text-slate-600 mb-3">
                       Create presentation-ready charts and dashboards tailored for financial storytelling.
                     </p>
-                    <p className="text-sm text-emerald-600 font-medium">
+                    <p className="text-sm text-blue-600 font-medium">
                       Feature: Choose from finance-specific templates (P&L summaries, variance analyses, KPI dashboards) or build your own.
                     </p>
                   </div>
@@ -212,15 +212,15 @@ const Home = () => {
             <Card className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 rounded-lg">
-                    <MessageCircle className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <MessageCircle className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">Uncover Instant Insights</h3>
                     <p className="text-slate-600 mb-3">
                       "Talk" to your data in plain English and get immediate answers to your financial questions.
                     </p>
-                    <p className="text-sm text-emerald-600 font-medium">
+                    <p className="text-sm text-blue-600 font-medium">
                       Feature: Ask "What's our YTD revenue growth?" or "Compare expenses for Q1 vs Q2" and see results instantly.
                     </p>
                   </div>
@@ -231,15 +231,15 @@ const Home = () => {
             <Card className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 rounded-lg">
-                    <Target className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Target className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">Focus on What Matters</h3>
                     <p className="text-slate-600 mb-3">
                       Quickly identify trends, anomalies, and key performance indicators crucial for leadership updates.
                     </p>
-                    <p className="text-sm text-emerald-600 font-medium">
+                    <p className="text-sm text-blue-600 font-medium">
                       Feature: Automated insight suggestions highlight critical data points for your narrative.
                     </p>
                   </div>
@@ -251,8 +251,8 @@ const Home = () => {
           <Card className="mt-8 hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-100 rounded-lg">
-                  <Share className="h-6 w-6 text-emerald-600" />
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Share className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">Communicate with Clarity</h3>
@@ -272,29 +272,29 @@ const Home = () => {
           <h2 className="text-3xl font-bold text-slate-900 text-center mb-8">
             Built for Financial Teams Like Yours
           </h2>
-          <Card className="border-emerald-200">
+          <Card className="border-blue-200">
             <CardContent className="p-8">
               <p className="text-lg text-slate-600 mb-6 text-center">
                 We understand the unique pressures and needs of financial reporting. FinFlow is designed to:
               </p>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="h-6 w-6 text-emerald-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Clock className="h-6 w-6 text-blue-600" />
                   </div>
                   <p className="font-semibold text-slate-900">Support Common Formats</p>
                   <p className="text-sm text-slate-600">Work with your existing financial data formats</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle className="h-6 w-6 text-emerald-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle className="h-6 w-6 text-blue-600" />
                   </div>
                   <p className="font-semibold text-slate-900">Speak Your Language</p>
                   <p className="text-sm text-slate-600">Financial terminology and KPI understanding built-in</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Target className="h-6 w-6 text-emerald-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Target className="h-6 w-6 text-blue-600" />
                   </div>
                   <p className="font-semibold text-slate-900">Build Trust</p>
                   <p className="text-sm text-slate-600">Accurate, easy-to-understand visuals and insights</p>
@@ -325,7 +325,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart className="h-6 w-6 text-emerald-500" />
+              <BarChart className="h-6 w-6 text-blue-500" />
               <span className="text-lg font-bold">FinFlow</span>
             </div>
             <p className="text-slate-400">© 2024 FinFlow. All rights reserved.</p>

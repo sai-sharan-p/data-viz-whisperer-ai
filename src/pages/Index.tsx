@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { Brain, FileBarChart, Database, FileText, ChevronLeft, BarChart, MessageCircle, LayoutDashboard, ArrowLeft, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import FileUploader from "@/components/FileUploader";
 import VariableSelector from "@/components/VariableSelector";
@@ -27,7 +26,7 @@ const Index = () => {
   const [visualizations, setVisualizations] = useState<VisualizationData[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"visualize" | "chat" | "builder">("visualize");
+  const [activeTab, setActiveTab] = useState<"trends" | "chat" | "builder">("trends");
   const [error, setError] = useState<string | null>(null);
   
   const handleFileUpload = async (file: File) => {
@@ -148,8 +147,8 @@ const Index = () => {
       </div>
 
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-2 bg-emerald-100 rounded-full mb-4">
-          <FileBarChart className="h-8 w-8 text-emerald-600" />
+        <div className="inline-flex items-center justify-center p-2 bg-blue-100 rounded-full mb-4">
+          <FileBarChart className="h-8 w-8 text-blue-600" />
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">FinFlow Analytics</h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
@@ -244,7 +243,7 @@ const Index = () => {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-semibold">Analysis: {analyzedVariable}</h1>
+          <h1 className="text-xl font-semibold">FinFlow Analysis: {analyzedVariable}</h1>
           <Badge variant="outline" className="ml-2">
             {processedData?.summary.numericColumns.includes(analyzedVariable || "") 
               ? "Numeric" 
@@ -254,11 +253,11 @@ const Index = () => {
           </Badge>
         </div>
         
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "visualize" | "chat" | "builder")}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "trends" | "chat" | "builder")}>
           <TabsList>
-            <TabsTrigger value="visualize" className="flex items-center gap-2">
-              <BarChart className="h-4 w-4" />
-              Visualize
+            <TabsTrigger value="trends" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Trends & Insights
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
@@ -274,7 +273,7 @@ const Index = () => {
       
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeTab} className="h-full">
-          <TabsContent value="visualize" className="h-full m-0">
+          <TabsContent value="trends" className="h-full m-0">
             <ResizablePanelGroup direction="horizontal" className="h-full">
               <ResizablePanel defaultSize={70} minSize={40}>
                 <div className="p-6 h-full overflow-auto">
@@ -331,8 +330,8 @@ interface StepIndicatorProps {
 
 const StepIndicator = ({ number, status, label }: StepIndicatorProps) => {
   const bgColor = 
-    status === "complete" ? "bg-emerald-600 text-white" :
-    status === "current" ? "bg-white border-2 border-emerald-600 text-emerald-600" :
+    status === "complete" ? "bg-blue-600 text-white" :
+    status === "current" ? "bg-white border-2 border-blue-600 text-blue-600" :
     "bg-gray-100 text-gray-400";
   
   return (
