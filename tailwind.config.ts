@@ -64,12 +64,24 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				finflow: {
-					primary: '#2563eb',     // blue-600
+					primary: '#1e3a8a',     // blue-800 (navy)
 					secondary: '#0f172a',   // slate-900
-					accent: '#3b82f6',      // blue-500
+					accent: '#1e40af',      // blue-700 (dark navy)
 					background: '#f8fafc',  // slate-50
 					foreground: '#0f172a',  // slate-900
 					muted: '#64748b',       // slate-500
+				},
+				navy: {
+					50: '#f0f4ff',
+					100: '#dbeafe',
+					200: '#bfdbfe',
+					300: '#93c5fd',
+					400: '#60a5fa',
+					500: '#3b82f6',
+					600: '#2563eb',
+					700: '#1d4ed8',
+					800: '#1e40af',
+					900: '#1e3a8a',
 				}
 			},
 			borderRadius: {

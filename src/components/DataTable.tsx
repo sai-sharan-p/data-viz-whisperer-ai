@@ -15,39 +15,41 @@ const DataTable = ({ processedData }: DataTableProps) => {
   const displayData = data.slice(0, MAX_ROWS);
   
   return (
-    <div className="border rounded-md w-full overflow-hidden">
-      <ScrollArea className="h-[300px]">
-        <div className="overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {headers.map((header) => (
-                  <TableHead key={header} className="font-semibold whitespace-nowrap">
-                    {header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+    <div className="w-full max-w-full">
+      <div className="border rounded-md overflow-hidden bg-white">
+        <ScrollArea className="h-[300px] w-full">
+          <div className="min-w-full overflow-x-auto">
+            <Table className="w-full">
+              <TableHeader className="bg-navy-50">
+                <TableRow>
                   {headers.map((header) => (
-                    <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap">
-                      {row[header] !== undefined ? String(row[header]) : ''}
-                    </TableCell>
+                    <TableHead key={header} className="font-semibold whitespace-nowrap min-w-[120px] text-navy-700 border-r border-navy-200 last:border-r-0">
+                      {header}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {displayData.map((row, rowIndex) => (
+                  <TableRow key={rowIndex} className="hover:bg-navy-25">
+                    {headers.map((header) => (
+                      <TableCell key={`${rowIndex}-${header}`} className="py-2 whitespace-nowrap min-w-[120px] border-r border-slate-200 last:border-r-0 text-sm">
+                        {row[header] !== undefined ? String(row[header]) : ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </ScrollArea>
         
         {data.length > MAX_ROWS && (
-          <div className="py-2 text-center text-sm text-muted-foreground">
+          <div className="py-2 text-center text-sm text-muted-foreground bg-slate-50 border-t">
             Showing {MAX_ROWS} of {data.length} rows
           </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 };

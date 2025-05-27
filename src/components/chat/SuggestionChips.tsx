@@ -5,10 +5,8 @@ import { Lightbulb } from "lucide-react";
 
 export const DEFAULT_SUGGESTIONS = [
   "What are the key insights from this dataset?",
-  "Summarize the main trends in the data",
-  "Show me a visualization of the most important variables",
-  "What correlations exist between numerical variables?",
-  "How is the data distributed?",
+  "Show me a summary of the main trends",
+  "What correlations exist between variables?"
 ];
 
 interface SuggestionChipsProps {
@@ -25,7 +23,7 @@ const SuggestionChips = ({ suggestions, onSuggestionClick }: SuggestionChipsProp
           variant="secondary" 
           size="sm"
           onClick={() => onSuggestionClick(suggestion)}
-          className="text-sm"
+          className="text-sm bg-navy-100 hover:bg-navy-200 text-navy-800 border-navy-300"
         >
           <Lightbulb className="mr-2 h-4 w-4" />
           {suggestion}

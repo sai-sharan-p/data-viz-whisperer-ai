@@ -135,7 +135,7 @@ const Index = () => {
   };
   
   const renderInitialView = () => (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Back to Home Button */}
       <div className="mb-6">
         <Link to="/">
@@ -147,8 +147,8 @@ const Index = () => {
       </div>
 
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-2 bg-blue-100 rounded-full mb-4">
-          <FileBarChart className="h-8 w-8 text-blue-600" />
+        <div className="inline-flex items-center justify-center p-2 bg-navy-100 rounded-full mb-4">
+          <FileBarChart className="h-8 w-8 text-navy-600" />
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">FinFlow Analytics</h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
@@ -171,7 +171,7 @@ const Index = () => {
           <>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Dataset Preview</h3>
-              <div className="overflow-x-auto">
+              <div className="w-full">
                 <DataTable processedData={processedData} />
               </div>
             </div>
@@ -330,8 +330,8 @@ interface StepIndicatorProps {
 
 const StepIndicator = ({ number, status, label }: StepIndicatorProps) => {
   const bgColor = 
-    status === "complete" ? "bg-blue-600 text-white" :
-    status === "current" ? "bg-white border-2 border-blue-600 text-blue-600" :
+    status === "complete" ? "bg-navy-600 text-white" :
+    status === "current" ? "bg-white border-2 border-navy-600 text-navy-600" :
     "bg-gray-100 text-gray-400";
   
   return (
@@ -358,7 +358,7 @@ interface DataStatCardProps {
 
 const DataStatCard = ({ icon, label, value }: DataStatCardProps) => (
   <div className="flex items-center gap-3 p-3 border rounded-md bg-card">
-    <div className="p-2 bg-primary/10 rounded">
+    <div className="p-2 bg-navy-100 rounded">
       {icon}
     </div>
     <div>
