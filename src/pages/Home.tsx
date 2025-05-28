@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, BarChart, MessageCircle, Target, Share, Clock } from "lucide-react";
@@ -247,6 +246,7 @@ const Home = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
       </section>
 
       {/* Section 4: Built for Financial Teams */}
