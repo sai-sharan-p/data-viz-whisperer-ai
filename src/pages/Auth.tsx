@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Mail, Lock, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,41 +17,39 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, loading } = useAuth();
 
   useEffect(() => {
-    // Redirect to analytics if user is already logged in
-    if (!loading && user) {
-      navigate('/analytics');
-    }
-  }, [user, loading, navigate]);
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/analytics');
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      console.log('Attempting Google login...');
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/analytics`
         }
       });
       
-      console.log('Google login response:', { data, error });
-      
       if (error) {
-        console.error('Google login error:', error);
         toast({
           title: "Error",
-          description: error.message || "Failed to sign in with Google",
+          description: error.message,
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error('Google login exception:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred with Google sign-in",
+        description: "An unexpected error occurred",
         variant: "destructive"
       });
     } finally {
@@ -66,8 +63,7 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        console.log('Attempting sign up with email:', email);
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -77,10 +73,7 @@ const Auth = () => {
           }
         });
         
-        console.log('Sign up response:', { data, error });
-        
         if (error) {
-          console.error('Sign up error:', error);
           toast({
             title: "Sign Up Error",
             description: error.message,
@@ -93,28 +86,22 @@ const Auth = () => {
           });
         }
       } else {
-        console.log('Attempting sign in with email:', email);
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password
         });
         
-        console.log('Sign in response:', { data, error });
-        
         if (error) {
-          console.error('Sign in error:', error);
           toast({
             title: "Login Error",
             description: error.message,
             variant: "destructive"
           });
-        } else if (data.user) {
-          console.log('Successfully signed in, navigating to analytics');
+        } else {
           navigate('/analytics');
         }
       }
     } catch (error) {
-      console.error('Email auth exception:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -124,15 +111,6 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-
-  // Show loading while checking auth state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
