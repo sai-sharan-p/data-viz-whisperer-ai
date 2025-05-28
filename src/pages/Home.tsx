@@ -34,12 +34,12 @@ const Home = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-                FinFlow: Stop Drowning in Spreadsheets. Craft Leadership-Ready Financial Reports in{" "}
+                FinFlow: Craft Leadership-Ready Financial Reports in{" "}
                 <span className="text-blue-600">Minutes.</span>
               </h1>
               <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                Empower your finance team to instantly analyze data, visualize key metrics, and generate 
-                insightful reports for leadership—without the usual manual grind.
+                Instantly analyze data, visualize key metrics, and generate 
+                insightful reports for leadership teams—without the usual manual grind.
               </p>
               <Link to="/analytics">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-lg">
@@ -123,7 +123,7 @@ const Home = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-3 text-slate-900">Data Wrestling</h3>
                 <p className="text-slate-600">
-                  Is your team spending more time wrestling with raw data and building charts than 
+                  Spending more time wrestling with raw data and building charts than 
                   on strategic financial analysis?
                 </p>
               </CardContent>
@@ -159,7 +159,7 @@ const Home = () => {
           <p className="text-xl text-slate-600 leading-relaxed">
             FinFlow is a powerful yet intuitive data analytics web app, customized for financial professionals. 
             We help middle managers, team leads, and senior managers like you transform complex financial data 
-            into clear, concise, and compelling reports for leadership—in a fraction of the time.
+            into clear, concise, and compelling reports for leadership teams—in a fraction of the time.
           </p>
         </div>
       </section>
@@ -247,23 +247,6 @@ const Home = () => {
               </CardContent>
             </Card>
           </div>
-
-          <Card className="mt-8 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Share className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Communicate with Clarity</h3>
-                  <p className="text-slate-600 mb-3">
-                    Export your findings in formats perfect for presentations and leadership reviews.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </section>
 
       {/* Section 4: Built for Financial Teams */}
