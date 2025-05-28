@@ -247,6 +247,7 @@ const Home = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
       </section>
 
       {/* Section 4: Built for Financial Teams */}
