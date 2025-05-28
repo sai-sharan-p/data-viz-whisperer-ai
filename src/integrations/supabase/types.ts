@@ -10,9 +10,15 @@ export type Database = {
   public: {
     Tables: {
       Customers: {
-        Row: {}
-        Insert: {}
-        Update: {}
+        Row: {
+          id: string
+        }
+        Insert: {
+          id: string
+        }
+        Update: {
+          id?: string
+        }
         Relationships: []
       }
       profiles: {

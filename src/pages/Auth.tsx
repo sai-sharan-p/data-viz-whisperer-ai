@@ -21,9 +21,21 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/analytics');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Current session check:', { session, error });
+        
+        if (error) {
+          console.error('Session check error:', error);
+          return;
+        }
+        
+        if (session) {
+          console.log('User already authenticated, redirecting to analytics');
+          navigate('/analytics');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
       }
     };
     checkUser();
@@ -31,25 +43,34 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    console.log('Starting Google OAuth...');
+    
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/analytics`
         }
       });
       
+      console.log('Google OAuth response:', { data, error });
+      
       if (error) {
+        console.error('Google OAuth error:', error);
         toast({
-          title: "Error",
-          description: error.message,
+          title: "Google Sign-In Error",
+          description: error.message || "Failed to sign in with Google",
           variant: "destructive"
         });
+      } else {
+        console.log('Google OAuth initiated successfully');
+        // The redirect will happen automatically
       }
     } catch (error) {
+      console.error('Google OAuth exception:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred during Google sign-in",
         variant: "destructive"
       });
     } finally {
@@ -60,51 +81,79 @@ const Auth = () => {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    console.log('Starting email auth:', { isSignUp, email, hasPassword: !!password });
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
+        console.log('Attempting signup...');
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
           password,
           options: {
             data: {
-              full_name: fullName,
+              full_name: fullName.trim(),
             }
           }
         });
         
+        console.log('Signup response:', { data, error });
+        
         if (error) {
+          console.error('Signup error:', error);
           toast({
             title: "Sign Up Error",
             description: error.message,
             variant: "destructive"
           });
         } else {
-          toast({
-            title: "Success!",
-            description: "Please check your email to confirm your account.",
-          });
+          console.log('Signup successful:', data);
+          if (data.user && !data.session) {
+            // User needs to confirm email
+            toast({
+              title: "Check Your Email",
+              description: "We've sent you a confirmation link. Please check your email and click the link to complete your registration.",
+            });
+          } else if (data.session) {
+            // User is immediately signed in (email confirmation disabled)
+            console.log('User signed in immediately');
+            navigate('/analytics');
+          }
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
+        console.log('Attempting signin...');
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
           password
         });
         
+        console.log('Signin response:', { data, error });
+        
         if (error) {
+          console.error('Signin error:', error);
+          let errorMessage = error.message;
+          
+          if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          }
+          
           toast({
-            title: "Login Error",
-            description: error.message,
+            title: "Sign In Error",
+            description: errorMessage,
             variant: "destructive"
           });
         } else {
+          console.log('Signin successful:', data);
           navigate('/analytics');
         }
       }
     } catch (error) {
+      console.error('Auth exception:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -245,6 +294,13 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-gray-500 text-center">
+            Current URL: {window.location.origin}
+          </div>
+        )}
       </div>
     </div>
   );
