@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, BarChart, MessageCircle, Target, Share, Clock } from "lucide-react";
@@ -18,7 +17,7 @@ const Home = () => {
               <span className="text-xl font-bold">FinFlow</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/analytics">
+              <Link to="/auth">
                 <Button variant="outline" className="bg-white text-slate-900 hover:bg-gray-100">
                   Get Started
                 </Button>
@@ -41,7 +40,7 @@ const Home = () => {
                 Empower your finance team to instantly analyze data, visualize key metrics, and generate 
                 insightful reports for leadership—without the usual manual grind.
               </p>
-              <Link to="/analytics">
+              <Link to="/auth">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-lg">
                   Get Started
                 </Button>
@@ -312,7 +311,7 @@ const Home = () => {
           <p className="text-xl mb-8 opacity-90">
             Join financial professionals who are already saving hours every week with FinFlow.
           </p>
-          <Link to="/analytics">
+          <Link to="/auth">
             <Button size="lg" variant="secondary" className="bg-white text-slate-900 hover:bg-gray-100 px-8 py-3 text-lg">
               Get Started
             </Button>
